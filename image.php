@@ -2,6 +2,14 @@
 
 
 
+
+/* /////////////////////////////////
+
+    LOAD BACKGROUND IMAGE 
+
+*/ /////////////////////////////////
+
+
 $im = new imagick(realpath("Photos/cloud/ali-abdul-rahman-l0PVhG5Af5E-unsplash.jpg"));
 $imageprops = $im->getImageGeometry();
 $im->setImageCompressionQuality(100);
@@ -19,10 +27,7 @@ if($width > $height){
 $im->resizeImage($newWidth,$newHeight, imagick::FILTER_LANCZOS, 0.9, true);
 $im->cropImage (600,800,0,0);
 
-$fileHandle = fopen("test.jpg", "w");
-$im->writeImageFile( $fileHandle);
 
- 
 
 
 function image_cover(Imagick $image, $width, $height) {
@@ -57,73 +62,131 @@ function image_cover(Imagick $image, $width, $height) {
 
 
 
-/*
-
-
-  $backgroundImagick = new \Imagick(realpath("Photos/cloud/billy-huynh-v9bnfMCyKbg-unsplash.jpg"));
-    $imagick = new \Imagick();
-    $imagick->setCompressionQuality($quality);
-    $imagick->newPseudoImage(
-        $backgroundImagick->getImageWidth(),
-        $backgroundImagick->getImageHeight(),
-        'canvas:white'
-    );
-
-    $imagick->compositeImage(
-        $backgroundImagick,
-        \Imagick::COMPOSITE_ATOP,
-        0,
-        0
-    );
-    
-    $imagick->setFormat("jpg");    
-    header("Content-Type: image/jpg");
-    echo $imagick->getImageBlob();
-
-*/
-/*
-
-
-    $image = new \Imagick(600, 800);
-            $image->setCompressionQuality(1);
 
 
 
-    $image->newPseudoImage(
-        $backGroundImage->getImageWidth(),
-        $backGroundImage->getImageHeight(),
-        'canvas:white'
-    );
-
-    $image->compositeImage(
-        $backGroundImage,
-        \Imagick::COMPOSITE_ATOP,
-        0,
-        0
-    );
-
-*/
-   // $image->newImage(600, 800, new \ImagickPixel('pink'));
-  //  $image->setImageFormat("jpg");
-  /* $texture = new \Imagick(realpath("Photos/cloud/ali-abdul-rahman-l0PVhG5Af5E-unsplash.jpg"));
-    $texture->scaleimage($image->getimagewidth() / 4, $image->getimageheight() / 4);
-    $image = $image->textureImage($texture);*/
-//    $image->drawImage($backGroundImage);
-    # Combine multiple images into one, stackde vertically.
-//$image = $backGroundImage->appendImages(true);
-  //  $image->drawImage($draw);
 
 
 
-  //  $imagick = new \Imagick(realpath("Photos/cloud/ali-abdul-rahman-l0PVhG5Af5E-unsplash.jpg"));
-/*
-   $imagick = new \Imagick(realpath("Photos/cloud/ali-abdul-rahman-l0PVhG5Af5E-unsplash.jpg"));
-
-    640, 480, 
-    $imagick->setImageFormat("jpg");
-
-    header("Content-Type: image/jpg");
-    echo $image->getImageBlob();
 
 
-*/
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    WRITE TEXT
+
+*/ /////////////////////////////////
+
+
+
+$white = "rgba(255, 255, 255,1)";
+$whiteTransp = "rgba(255, 255, 255,0.5)";
+$fontDINNNext = "fonts/DINNextLTPro-Medium.ttf";
+$fontDINNExp = "fonts/D-DINExp.ttf";
+$fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
+
+
+
+
+// Main temperature
+$im = WriteText($im, "15°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+// minTemp
+$im = WriteText($im, "15°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
+// maxTemp
+$im = WriteText($im, "15°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
+
+// Main Weather
+$im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALIGN_CENTER  );
+
+
+
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    SAVE IMAGE
+
+*/ /////////////////////////////////
+
+
+
+$fileHandle = fopen("test.jpg", "w");
+$im->writeImageFile( $fileHandle);
+
+ 
+
+
+
+
+function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) {
+
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($fillColor);
+    $draw->setStrokeWidth(0);
+    $draw->setFontSize($fontSize);
+    $draw->setFont($font);
+    $draw->setTextAlignment($align);
+    $image->annotateimage($draw, $x, $y, 0, $text);
+
+    $draw->setFillColor("rgb(200, 32, 32)");
+    $draw->circle($x, $y, $x+2, $y+2);
+
+    $image->drawImage($draw);
+
+    return $image;
+}
+
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    ICONS
+
+*/ /////////////////////////////////
+
+
+
+
+
+
+
+ini_set('display_errors', 0);
+
+$xmlfile = file_get_contents("weathericons.xml");
+$xml = simplexml_load_string($xmlfile,"SimpleXMLElement");
+$iconsList = array();
+foreach($xml->children() as $child) {
+    $att = $child->attributes();
+    $iconsList += array($att->name->__toString() => $child[0]->__toString());
+}
+
+echo GetIcon($iconsList,"wi-day-showers");
+
+function GetIcon($list, $name) {
+    $name = str_replace("-", "_", $name);
+    if(array_key_exists($name, $list)) {
+        return $list[$name];
+    } else {
+       return "";
+    }
+}
+
+
+
+
+
+
+
