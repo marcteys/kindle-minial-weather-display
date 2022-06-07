@@ -9,12 +9,10 @@
 include('image.php');
 
 ?>
-<img src="test.jpg">
     <?php
 
 
 
-echo '<br>';
 
 // https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__
 // https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__
@@ -28,34 +26,42 @@ echo '<br>';
 
 
 
+/* ///////////////////
+
+*   CHECK THE FILES TO SEE THE LAST UPDATE. 
+
+*/ ///////////////////
+
 date_default_timezone_set('Europe/Paris'); 
 $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
 $todayString = $today->format('Y-m-d H:i:s');
-
-
 $file = 'weather.json';
 $content =  json_decode(file_get_contents($file));
 $lastUpdate =  $content->lastUpdate;
-
 $fileDate = new DateTime($lastUpdate);
-
-
-
 $secondsBetweenTwoEvents = (strtotime($todayString) - strtotime($fileDate->format("Y-m-d H:i:s")));
-
-
 if($secondsBetweenTwoEvents < (20 * 60) && !isset($_GET["force"])) { // 10 minutes
   echo file_get_contents($file);
   return;
-  echo "THis should never happend";
+  echo "This should never happend";
 }
+
+
+
+
+/* ///////////////////
+
+*   GET THE WEATHER ONLINE OR FROM THE FILES
+
+*/ ///////////////////
 
 
 
 $JSONDATA = json_decode("{}");
 $forecast = "";
 $raincast = "";
-if(!isset($_GET["test"])) {
+
+if(!isset($_GET["test"])) { // Get The readl data;
 
 $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
 $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
@@ -69,15 +75,29 @@ $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018cl
 }
 
 //var_dump(json_decode($forecast));
-var_dump(json_decode($forecast));
 
 $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
-
-
 $JSONDATA = $merged;
 
 
 
+
+/* ///////////////////
+
+*   Make the data pretty
+
+*/ ///////////////////
+
+// From top to bottom
+$WeatherData = array {
+  "lastUpdateDate" => ,
+  "lastUpdateTime" => ,
+  "dayTemperature" => ,
+  "dayMinTemperature" => ,
+  "dayMaxTemperature" => ,
+  "precipitations" => , // false if none
+
+}
 
 // Display Rain
 
@@ -86,13 +106,22 @@ foreach ($JSONDATA["raincast"]->properties->forecast as $key => $value) {
  echo $value->rain_intensity;
 }
 
-
 foreach ($JSONDATA["forecast"]->properties->forecast as $key => $value) {
  echo $value->weather_icon;
  echo "<br>";
  echo getIcones($value->weather_description);
 }
 //var_dump($JSONDATA["forecast"]->properties->forecast);
+
+
+
+/* ///////////////////
+
+*   TOOLS
+
+*/ ///////////////////
+
+
 
 
 
@@ -277,6 +306,7 @@ echo $finalValueJson;
 
 
 ?>
+<img src="test.jpg">
 
 
 

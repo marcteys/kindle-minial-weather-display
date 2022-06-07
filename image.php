@@ -102,6 +102,7 @@ $im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALI
 
 // Date
 $im = WriteText($im, "Mardi 6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, "20h30", $white, 20, $fontDINNNext, 600-45, 45,\Imagick::ALIGN_RIGHT);
 
 
 
@@ -131,13 +132,15 @@ for( $i = 0; $i < 5 ;$i++) {
 */ /////////////////////////////////
 
     // icone
-    $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, 350,\Imagick::ALIGN_CENTER);
 
 $leftMargin = 70;
 $topPosition = 335;
 $width = 36;
 $height = 7;
 $margin = 3;
+
+    $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, $topPosition + 15,\Imagick::ALIGN_CENTER);
+
 
 for( $i = 0; $i < 6 ;$i++) {
     $draw = new \ImagickDraw();
@@ -243,9 +246,13 @@ foreach($xml->children() as $child) {
     $iconsList += array($att->name->__toString() => $child[0]->__toString());
 }
 
-echo GetIcon($iconsList,"wi-day-showers");
+//echo GetIcon($iconsList,"day-showers");
 
 function GetIcon($list, $name) {
+    if ( ! (strpos($name, 'wi') === 0) ) {
+        $name = "wi_".$name;
+    }
+
     $name = str_replace("-", "_", $name);
     if(array_key_exists($name, $list)) {
         return $list[$name];
