@@ -1,7 +1,6 @@
 <?php
 
 
-
 /* /////////////////////////////////
 
     LOAD BACKGROUND IMAGE 
@@ -102,7 +101,7 @@ $im = WriteText($im, "15°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_
 $im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALIGN_CENTER  );
 
 // Date
-$im = WriteText($im, "6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, "Mardi 6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
 
 
 
@@ -144,7 +143,7 @@ for( $i = 0; $i < 6 ;$i++) {
     $draw = new \ImagickDraw();
     $draw->setFillColor($white);
     $position = $leftMargin + $i * $width + ($i * $margin);
-    for($x = 0; $x <3; $x++) {
+    for($x = 0; $x <4; $x++) {
         $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
         $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
     }
@@ -159,7 +158,7 @@ for( $i = 0; $i < 3 ;$i++) {
     $draw = new \ImagickDraw();
     $draw->setFillColor($white);
     $position = $leftMargin + $i * $width + ($i * $margin);
-    for($x = 0; $x <3; $x++) {
+    for($x = 0; $x <4; $x++) {
         $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
         $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
     }
@@ -171,11 +170,17 @@ for( $i = 0; $i < 3 ;$i++) {
 
 
 // Text 
-for( $i = 0; $i < 4 ;$i++) {
-     $im = WriteText($im, "+10 min", $white, 20, $fontDINNNext, $position, 710,\Imagick::ALIGN_CENTER);
-
+for( $i = 0; $i < 5 ;$i++) {
+    $text  = "";
+    $text .= 1+$i."";
+    $text .= "0min";
+    $textPos = 150 + ($margin + $width ) * $i;
+    $im = WriteText($im, $text, $white, 12, $fontDINNNext, $textPos, $topPosition + 22,\Imagick::ALIGN_CENTER);
 }
-
+    // time start
+    $im = WriteText($im, "22h30", $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
+    // time end
+    $im = WriteText($im, "23h30", $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
 
 
 
