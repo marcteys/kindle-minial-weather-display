@@ -2,7 +2,6 @@
 
 
 
-
 /* /////////////////////////////////
 
     LOAD BACKGROUND IMAGE 
@@ -72,10 +71,6 @@ function image_cover(Imagick $image, $width, $height) {
 
 
 
-
-
-
-
 /* /////////////////////////////////
 
     WRITE TEXT
@@ -86,15 +81,18 @@ function image_cover(Imagick $image, $width, $height) {
 
 $white = "rgba(255, 255, 255,1)";
 $whiteTransp = "rgba(255, 255, 255,0.5)";
-$fontDINNNext = "fonts/DINNextLTPro-Medium.ttf";
+$fontDINNNext = "fonts/D-DIN.ttf";
+$fontDINNNextBold = "fonts/D-DIN-Bold.ttf";
 $fontDINNExp = "fonts/D-DINExp.ttf";
 $fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
 
 
-
-
 // Main temperature
 $im = WriteText($im, "15°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+// Main temperature text
+$im = WriteText($im, "Très nuageux", $white, 30, $fontDINNNext, 300, 275,\Imagick::ALIGN_CENTER);
+
+
 // minTemp
 $im = WriteText($im, "15°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
 // maxTemp
@@ -103,9 +101,80 @@ $im = WriteText($im, "15°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_
 // Main Weather
 $im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALIGN_CENTER  );
 
+// Date
+$im = WriteText($im, "6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
 
 
 
+
+$position = 100;
+$width = 100;
+// Weathers du bas 
+for( $i = 0; $i < 5 ;$i++) {
+
+    //titre
+    $im = WriteText($im, "Soirée", $white, 20, $fontDINNNext, $position, 600,\Imagick::ALIGN_CENTER);
+    // icone
+    $im = WriteText($im, "", $white, 37, $fontWeatherIcon, $position, 660,\Imagick::ALIGN_CENTER);
+    //temp
+     $im = WriteText($im, "13°", $white, 20, $fontDINNNextBold, $position, 710,\Imagick::ALIGN_CENTER);
+    $position += $width; // width = 120
+}
+
+
+
+
+
+/* /////////////////////////////////
+
+    Rain Cast
+
+*/ /////////////////////////////////
+
+    // icone
+    $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, 350,\Imagick::ALIGN_CENTER);
+
+$leftMargin = 70;
+$topPosition = 335;
+$width = 36;
+$height = 7;
+$margin = 3;
+
+for( $i = 0; $i < 6 ;$i++) {
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $position = $leftMargin + $i * $width + ($i * $margin);
+    for($x = 0; $x <3; $x++) {
+        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+    }
+    $im->drawImage($draw);
+}
+
+
+
+$width = 72;
+$leftMargin = 304;
+for( $i = 0; $i < 3 ;$i++) {
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $position = $leftMargin + $i * $width + ($i * $margin);
+    for($x = 0; $x <3; $x++) {
+        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+    }
+    $im->drawImage($draw);
+
+}
+
+
+
+
+// Text 
+for( $i = 0; $i < 4 ;$i++) {
+     $im = WriteText($im, "+10 min", $white, 20, $fontDINNNext, $position, 710,\Imagick::ALIGN_CENTER);
+
+}
 
 
 
@@ -125,8 +194,6 @@ $im->writeImageFile( $fileHandle);
  
 
 
-
-
 function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) {
 
     $draw = new \ImagickDraw();
@@ -137,8 +204,9 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
     $draw->setTextAlignment($align);
     $image->annotateimage($draw, $x, $y, 0, $text);
 
-    $draw->setFillColor("rgb(200, 32, 32)");
-    $draw->circle($x, $y, $x+2, $y+2);
+
+    //$draw->setFillColor("rgb(200, 32, 32)");
+    //$draw->circle($x, $y, $x+2, $y+2);
 
     $image->drawImage($draw);
 
@@ -162,9 +230,6 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
 
 
 
-
-ini_set('display_errors', 0);
-
 $xmlfile = file_get_contents("weathericons.xml");
 $xml = simplexml_load_string($xmlfile,"SimpleXMLElement");
 $iconsList = array();
@@ -183,9 +248,6 @@ function GetIcon($list, $name) {
        return "";
     }
 }
-
-
-
 
 
 

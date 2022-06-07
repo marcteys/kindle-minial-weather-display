@@ -69,7 +69,7 @@ $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018cl
 }
 
 //var_dump(json_decode($forecast));
-//var_dump(json_decode($raincast));
+var_dump(json_decode($forecast));
 
 $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
 
@@ -138,7 +138,6 @@ foreach ($JSONDATA["forecast"]->properties->forecast as $key => $value) {
     else if($icon == 'pluie verglacante') return 'sleet';
     else if($icon == 'ensoleille') return 'day-sunny';
     else return 'day-sunny';
-
   }
 
   function lowerAccent($_var) {
