@@ -6,11 +6,6 @@
 </head>
 <body>
 <?php
-include('image.php');
-
-?>
-    <?php
-
 
 
 
@@ -88,30 +83,379 @@ $JSONDATA = $merged;
 
 */ ///////////////////
 
+
+// Get Precipitations
+
+$PrecipitationsData = array();
+
+for($i = 0; $i < 9; $i++) {
+  $tmpTime = strtotime($JSONDATA["raincast"]->properties->forecast[$i]->time);
+  $time = date('H\hi', $tmpTime);
+  $prec = array(
+    "time" => $time,
+    "value" => $JSONDATA["raincast"]->properties->forecast[$i]->rain_intensity,
+  );
+array_push($PrecipitationsData, $prec);
+}
+
+
+
+
+
+
+$PrevisionsData = array();
+for($i = 0; $i < 6; $i++) {
+  $DayData = array(
+  "temperature" => round($JSONDATA["forecast"]->properties->forecast[$i]->T),
+  "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
+  "maxTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_max),
+  "icon" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+  "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
+  "moment" => $JSONDATA["forecast"]->properties->forecast[$i]->moment_day
+);
+  array_push($PrevisionsData, $DayData);
+}
+
+
 // From top to bottom
-$WeatherData = array {
-  "lastUpdateDate" => ,
-  "lastUpdateTime" => ,
-  "dayTemperature" => ,
-  "dayMinTemperature" => ,
-  "dayMaxTemperature" => ,
-  "precipitations" => , // false if none
+$WeatherData = array(
+  "lastUpdateDate" => ucwords(strftime('%A %e %B')),
+  "lastUpdateTime" => $today->format('H\hi'),
+  "precipitations" => $PrecipitationsData, // false if none
+  "previsions" => $PrevisionsData, // false if none
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    LOAD BACKGROUND IMAGE 
+
+*/ /////////////////////////////////
+
+
+
+
+setlocale(LC_TIME, "fr_FR", "French");
+
+$folderName = $WeatherData['previsions'][0]['icon'];
+$imagesDir = 'Photos/'.$folderName.'/';
+if(!is_dir($imagesDir)) $imagesDir = 'Photos/cloud/';
+$images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
+$randomImageUrl = $images[array_rand($images)]; // See comments
+//echo $randomImageUrl;
+//$randomImageUrl = "Photos/day-sunny/sindy-sussengut-4V3X-GQLwYA-unsplash.jpg";
+
+
+
+$im = new imagick(realpath($randomImageUrl));
+$imageprops = $im->getImageGeometry();
+$im->setImageCompressionQuality(100);
+$im->cropThumbnailImage( 600, 800 );
+
+
+
+function image_cover(Imagick $image, $width, $height) {
+  $ratio = $width / $height;
+
+  // Original image dimensions.
+  $old_width = $image->getImageWidth();
+  $old_height = $image->getImageHeight();
+  $old_ratio = $old_width / $old_height;
+
+  // Determine new image dimensions to scale to.
+  // Also determine cropping coordinates.
+  if ($ratio > $old_ratio) {
+    $new_width = $width;
+    $new_height = $width / $old_width * $old_height;
+    $crop_x = 0;
+    $crop_y = intval(($new_height - $height) / 2);
+  }
+  else {
+    $new_width = $height / $old_height * $old_width;
+    $new_height = $height;
+    $crop_x = intval(($new_width - $width) / 2);
+    $crop_y = 0;
+  }
+
+  // Scale image to fit minimal of provided dimensions.
+  $image->resizeImage($new_width, $new_height, imagick::FILTER_LANCZOS, 0.9, true);
+
+  // Now crop image to exactly fit provided dimensions.
+  $image->cropImage($new_width, $new_height, $crop_x, $crop_y);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    WRITE TEXT
+
+*/ /////////////////////////////////
+
+
+
+$white = "rgba(255, 255, 255,1)";
+$whiteTransp = "rgba(255, 255, 255,0.5)";
+$fontDINNNext = "fonts/D-DIN.ttf";
+$fontDINNNextBold = "fonts/D-DIN-Bold.ttf";
+$fontDINNExp = "fonts/D-DINExp.ttf";
+$fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
+
+
+// Main temperature
+$im = WriteText($im, "15°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+// Main temperature text
+$im = WriteText($im, "Très nuageux", $white, 30, $fontDINNNext, 300, 275,\Imagick::ALIGN_CENTER);
+
+
+// minTemp
+$im = WriteText($im, "15°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
+// maxTemp
+$im = WriteText($im, "15°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
+
+// Main Weather
+$im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALIGN_CENTER  );
+
+// Date
+$im = WriteText($im, "Mardi 6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, "20h30", $white, 20, $fontDINNNext, 600-45, 45,\Imagick::ALIGN_RIGHT);
+
+
+
+
+$position = 100;
+$width = 100;
+// Weathers du bas 
+for( $i = 0; $i < 5 ;$i++) {
+
+    //titre
+    $im = WriteText($im, "Soirée", $white, 20, $fontDINNNext, $position, 600,\Imagick::ALIGN_CENTER);
+    // icone
+    $im = WriteText($im, "", $white, 37, $fontWeatherIcon, $position, 660,\Imagick::ALIGN_CENTER);
+    //temp
+     $im = WriteText($im, "13°", $white, 20, $fontDINNNextBold, $position, 710,\Imagick::ALIGN_CENTER);
+    $position += $width; // width = 120
+}
+
+
+
+
+
+/* /////////////////////////////////
+
+    Rain Cast
+
+*/ /////////////////////////////////
+
+    // icone
+
+$leftMargin = 70;
+$topPosition = 335;
+$width = 36;
+$height = 7;
+$margin = 3;
+
+    $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, $topPosition + 15,\Imagick::ALIGN_CENTER);
+
+
+for( $i = 0; $i < 6 ;$i++) {
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $position = $leftMargin + $i * $width + ($i * $margin);
+    for($x = 0; $x <4; $x++) {
+        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+    }
+    $im->drawImage($draw);
+}
+
+
+
+$width = 72;
+$leftMargin = 304;
+for( $i = 0; $i < 3 ;$i++) {
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $position = $leftMargin + $i * $width + ($i * $margin);
+    for($x = 0; $x <4; $x++) {
+        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+    }
+    $im->drawImage($draw);
 
 }
 
-// Display Rain
 
-//var_dump($JSONDATA["raincast"]->properties->forecast);
-foreach ($JSONDATA["raincast"]->properties->forecast as $key => $value) {
- echo $value->rain_intensity;
+
+
+// Text 
+for( $i = 0; $i < 5 ;$i++) {
+    $text  = "";
+    $text .= 1+$i."";
+    $text .= "0min";
+    $textPos = 150 + ($margin + $width ) * $i;
+    $im = WriteText($im, $text, $white, 12, $fontDINNNext, $textPos, $topPosition + 22,\Imagick::ALIGN_CENTER);
+}
+    // time start
+    $im = WriteText($im, "22h30", $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
+    // time end
+    $im = WriteText($im, "23h30", $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
+
+
+
+
+/* /////////////////////////////////
+
+    SAVE IMAGE
+
+*/ /////////////////////////////////
+
+
+
+$fileHandle = fopen("test.jpg", "w");
+$im->writeImageFile( $fileHandle);
+
+ 
+
+
+function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) {
+
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($fillColor);
+    $draw->setStrokeWidth(0);
+    $draw->setFontSize($fontSize);
+    $draw->setFont($font);
+    $draw->setTextAlignment($align);
+    $image->annotateimage($draw, $x, $y, 0, $text);
+
+
+    //$draw->setFillColor("rgb(200, 32, 32)");
+    //$draw->circle($x, $y, $x+2, $y+2);
+
+    $image->drawImage($draw);
+
+    return $image;
 }
 
-foreach ($JSONDATA["forecast"]->properties->forecast as $key => $value) {
- echo $value->weather_icon;
- echo "<br>";
- echo getIcones($value->weather_description);
+
+
+
+
+
+
+/* /////////////////////////////////
+
+    ICONS
+
+*/ /////////////////////////////////
+
+
+
+
+
+
+$xmlfile = file_get_contents("weathericons.xml");
+$xml = simplexml_load_string($xmlfile,"SimpleXMLElement");
+$iconsList = array();
+foreach($xml->children() as $child) {
+    $att = $child->attributes();
+    $iconsList += array($att->name->__toString() => $child[0]->__toString());
 }
-//var_dump($JSONDATA["forecast"]->properties->forecast);
+
+//echo GetIcon($iconsList,"day-showers");
+
+
+
+
+/*
+
+
+
+// add the "Content-type" header
+header('Content-type: image/jpeg'); 
+ 
+// add a "Expires" header with an offset of 24 hours
+$offset = 3600 * 24;    
+$expire = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
+header($expire);
+ 
+// add a "Cache-control" header
+header("Cache-Control: max-age=3600, must-revalidate");
+ 
+// Set the image format to JPEG and enable compression
+$image->setImageFormat("jpeg");
+$image->setImageCompression(Imagick::COMPRESSION_JPEG);
+ 
+// Set compression level (1 lowest quality, 100 highest quality)
+$image->setImageCompressionQuality(90);
+ 
+// Strip out unneeded meta data
+$image->stripImage();
+ 
+echo $image;
+exit;
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -184,6 +528,21 @@ foreach ($JSONDATA["forecast"]->properties->forecast as $key => $value) {
     $return = str_replace('\'', '', $return);
     return $return;
   }
+
+
+  function GetIconDrawing($list, $name) {
+    if ( ! (strpos($name, 'wi') === 0) ) {
+        $name = "wi_".$name;
+    }
+
+    $name = str_replace("-", "_", $name);
+    if(array_key_exists($name, $list)) {
+        return $list[$name];
+    } else {
+       return "";
+    }
+}
+
 
 /*
 
