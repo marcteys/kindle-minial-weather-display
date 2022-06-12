@@ -2,9 +2,12 @@
 
 include("image.php");
 
+//$im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
+$im->setImageType(\Imagick::IMGTYPE_GRAYSCALEMATTE);
+
 
 // add the "Content-type" header
-header('Content-type: image/jpeg'); 
+header('Content-type: image/png'); 
  
 // add a "Expires" header with an offset of 10 min
 $offset = 60 * 10; // (seconds * minutes)    
@@ -15,7 +18,7 @@ header($expire);
 header("Cache-Control: max-age=600, must-revalidate");
  
 // Set the image format to JPEG and enable compression
-$im->setImageFormat("jpeg");
+$im->setImageFormat("png");
 $im->setImageCompression(Imagick::COMPRESSION_JPEG);
  
 // Set compression level (1 lowest quality, 100 highest quality)

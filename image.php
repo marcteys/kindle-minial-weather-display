@@ -58,14 +58,14 @@ $lastUpdate = strtotime($JSONDATA["forecast"]->update_time);
 $differenceFromLastUpdate = (strtotime("now") - $lastUpdate);
 
 $forceAPIUpdate = false;
-if($differenceFromLastUpdate < (20 * 60)) $forceAPIUpdate = true;
-if(isset($_GET["force"])) $forceAPIUpdate = true;
-if(isset($_GET["test"])) $forceAPIUpdate = true;
-
+if($differenceFromLastUpdate > (10 * 60)) $forceAPIUpdate = true;
+else if(isset($_GET["force"])) $forceAPIUpdate = true;
+else if(isset($_GET["test"])) $forceAPIUpdate = true;
 
 
 if($forceAPIUpdate) { // Get The readl data;
-  echo "forceAPIUpdate";
+	$forecast = "";
+	$raincast = "";
   $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
   $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
      file_put_contents("forecast.json", $forecast);
@@ -75,6 +75,11 @@ if($forceAPIUpdate) { // Get The readl data;
 //http://api.openweathermap.org/data/2.5/forecast?q=Paris&appid=6522a661efd99b0d7e3c9095e8bb0b0b&units=metric
 } 
 
+
+if($debug ) {
+echo '<pre>';
+print_r($JSONDATA);
+echo '</pre>';}
 
 
 /* /////////////////////////////////
@@ -134,7 +139,10 @@ for($i = 0; $i < 6; $i++) {
   "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
   "maxTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_max),
   "iconText" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
-  "iconChar" => GetIconDrawing($iconsList,getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description)),
+  "iconChar" => GetIconDrawing($iconsList,
+  							   getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+  							   $JSONDATA["forecast"]->properties->forecast[$i]->moment_day == "Nuit"
+  							),
   "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
   "moment" => ucwords($JSONDATA["forecast"]->properties->forecast[$i]->moment_day,'-')
 );
@@ -145,7 +153,7 @@ for($i = 0; $i < 6; $i++) {
 // From top to bottom
 $WeatherData = array(
   "lastUpdateDate" => ucwords(strftime('%A %e %B')),
-  "lastUpdateTime" => $today->format('H\hi'),
+  "lastUpdateTime" => date('H\hi', $lastUpdate),
   "precipitations" => $PrecipitationSum != 9 ? $PrevisionsData : null, // false if none
   "previsions" => $PrevisionsData, // false if none
 );
@@ -154,9 +162,11 @@ $WeatherData = array(
 
 
 
-
 if($debug ) {
-  var_dump($WeatherData);
+
+	echo '<pre>';
+print_r($WeatherData);
+echo '</pre>';
 }
 
 
@@ -439,6 +449,7 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
 
    function getIcones($_var) {
     $icon = lowerAccent($_var);
+    $icon = str_replace('-',' ', $icon);
     if($icon == '' ) return 'day-sunny';
     else if($icon == 'nuit claire') return 'night-clear';
     else if($icon == 'tres nuageux') return 'cloudy';
@@ -497,9 +508,12 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
   }
 
 
-  function GetIconDrawing($list, $name) {
+  function GetIconDrawing($list, $name, $night) {
     if ( ! (strpos($name, 'wi') === 0) ) {
-        $name = "wi_".$name;
+    	if($night === true)
+    	    $name = "wi_night_".$name;
+		else
+        	$name = "wi_".$name;
     }
 
     $name = str_replace("-", "_", $name);
