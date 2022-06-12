@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test</title>
-</head>
-<body>
 <?php
 
 
@@ -28,6 +21,8 @@
 */ ///////////////////
 
 date_default_timezone_set('Europe/Paris'); 
+setlocale(LC_TIME, "fr_FR", "French");
+
 $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
 $todayString = $today->format('Y-m-d H:i:s');
 $file = 'weather.json';
@@ -38,8 +33,10 @@ $secondsBetweenTwoEvents = (strtotime($todayString) - strtotime($fileDate->forma
 if($secondsBetweenTwoEvents < (20 * 60) && !isset($_GET["force"])) { // 10 minutes
   echo file_get_contents($file);
   return;
-  echo "This should never happend";
 }
+
+$debug = isset($_GET["debug"]);
+$export = isset($_GET["export"]);
 
 
 
@@ -57,11 +54,11 @@ $forecast = "";
 $raincast = "";
 
 if(!isset($_GET["test"])) { // Get The readl data;
-
+/*
 $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
 $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
    file_put_contents("forecast.json", $forecast);
-  file_put_contents("raincast.json", $raincast);
+  file_put_contents("raincast.json", $raincast);*/
 
 //http://api.openweathermap.org/data/2.5/forecast?q=Paris&appid=6522a661efd99b0d7e3c9095e8bb0b0b&units=metric
 } else {
@@ -71,23 +68,52 @@ $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018cl
 
 //var_dump(json_decode($forecast));
 
+
+
+    $forecast = file_get_contents("forecast.json");
+    $raincast = file_get_contents("raincast.json");
+
+
+
 $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
 $JSONDATA = $merged;
 
 
 
+/* /////////////////////////////////
 
-/* ///////////////////
+    ICONS
 
-*   Make the data pretty
+*/ /////////////////////////////////
 
-*/ ///////////////////
+
+
+$xmlfile = file_get_contents("weathericons.xml");
+$xml = simplexml_load_string($xmlfile,"SimpleXMLElement");
+$iconsList = array();
+foreach($xml->children() as $child) {
+    $att = $child->attributes();
+    $iconsList += array($att->name->__toString() => $child[0]->__toString());
+}
+
+//echo GetIcon($iconsList,"day-showers");
+
+
+
+
+
+
+
+
+
+
+
 
 
 // Get Precipitations
 
 $PrecipitationsData = array();
-
+$PrecipitationSum = 0;
 for($i = 0; $i < 9; $i++) {
   $tmpTime = strtotime($JSONDATA["raincast"]->properties->forecast[$i]->time);
   $time = date('H\hi', $tmpTime);
@@ -95,8 +121,10 @@ for($i = 0; $i < 9; $i++) {
     "time" => $time,
     "value" => $JSONDATA["raincast"]->properties->forecast[$i]->rain_intensity,
   );
+  $PrecipitationSum += $JSONDATA["raincast"]->properties->forecast[$i]->rain_intensity;
 array_push($PrecipitationsData, $prec);
 }
+
 
 
 
@@ -109,9 +137,10 @@ for($i = 0; $i < 6; $i++) {
   "temperature" => round($JSONDATA["forecast"]->properties->forecast[$i]->T),
   "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
   "maxTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_max),
-  "icon" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+  "iconText" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+  "iconChar" => GetIconDrawing($iconsList,getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description)),
   "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
-  "moment" => $JSONDATA["forecast"]->properties->forecast[$i]->moment_day
+  "moment" => ucwords($JSONDATA["forecast"]->properties->forecast[$i]->moment_day,'-')
 );
   array_push($PrevisionsData, $DayData);
 }
@@ -121,11 +150,18 @@ for($i = 0; $i < 6; $i++) {
 $WeatherData = array(
   "lastUpdateDate" => ucwords(strftime('%A %e %B')),
   "lastUpdateTime" => $today->format('H\hi'),
-  "precipitations" => $PrecipitationsData, // false if none
+  "precipitations" => $PrecipitationSum != 9 ? $PrevisionsData : null, // false if none
   "previsions" => $PrevisionsData, // false if none
 );
 
 
+
+
+
+
+if($debug ) {
+  var_dump($WeatherData);
+}
 
 
 
@@ -162,9 +198,8 @@ $WeatherData = array(
 
 
 
-setlocale(LC_TIME, "fr_FR", "French");
 
-$folderName = $WeatherData['previsions'][0]['icon'];
+$folderName = $WeatherData['previsions'][0]['iconText'];
 $imagesDir = 'Photos/'.$folderName.'/';
 if(!is_dir($imagesDir)) $imagesDir = 'Photos/cloud/';
 $images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
@@ -178,42 +213,6 @@ $im = new imagick(realpath($randomImageUrl));
 $imageprops = $im->getImageGeometry();
 $im->setImageCompressionQuality(100);
 $im->cropThumbnailImage( 600, 800 );
-
-
-
-function image_cover(Imagick $image, $width, $height) {
-  $ratio = $width / $height;
-
-  // Original image dimensions.
-  $old_width = $image->getImageWidth();
-  $old_height = $image->getImageHeight();
-  $old_ratio = $old_width / $old_height;
-
-  // Determine new image dimensions to scale to.
-  // Also determine cropping coordinates.
-  if ($ratio > $old_ratio) {
-    $new_width = $width;
-    $new_height = $width / $old_width * $old_height;
-    $crop_x = 0;
-    $crop_y = intval(($new_height - $height) / 2);
-  }
-  else {
-    $new_width = $height / $old_height * $old_width;
-    $new_height = $height;
-    $crop_x = intval(($new_width - $width) / 2);
-    $crop_y = 0;
-  }
-
-  // Scale image to fit minimal of provided dimensions.
-  $image->resizeImage($new_width, $new_height, imagick::FILTER_LANCZOS, 0.9, true);
-
-  // Now crop image to exactly fit provided dimensions.
-  $image->cropImage($new_width, $new_height, $crop_x, $crop_y);
-}
-
-
-
-
 
 
 
@@ -233,6 +232,8 @@ function image_cover(Imagick $image, $width, $height) {
 
 $white = "rgba(255, 255, 255,1)";
 $whiteTransp = "rgba(255, 255, 255,0.5)";
+$blackStroke = "rgba(0, 0, 0,0.5)";
+$noColor = "rgba(255, 255, 255,0)";
 $fontDINNNext = "fonts/D-DIN.ttf";
 $fontDINNNextBold = "fonts/D-DIN-Bold.ttf";
 $fontDINNExp = "fonts/D-DINExp.ttf";
@@ -240,22 +241,22 @@ $fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
 
 
 // Main temperature
-$im = WriteText($im, "15°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
 // Main temperature text
-$im = WriteText($im, "Très nuageux", $white, 30, $fontDINNNext, 300, 275,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 30, $fontDINNNext, 300, 275,\Imagick::ALIGN_CENTER);
 
 
 // minTemp
-$im = WriteText($im, "15°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['minTemperature']."°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
 // maxTemp
-$im = WriteText($im, "15°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['maxTemperature']."°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
 
 // Main Weather
-$im = WriteText($im, "", $white, 80, $fontWeatherIcon, 230, 215,\Imagick::ALIGN_CENTER  );
+$im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 80, $fontWeatherIcon, 210, 215,\Imagick::ALIGN_CENTER  );
 
 // Date
-$im = WriteText($im, "Mardi 6 Juin", $white, 20, $fontDINNNext, 45, 45,\Imagick::ALIGN_LEFT);
-$im = WriteText($im, "20h30", $white, 20, $fontDINNNext, 600-45, 45,\Imagick::ALIGN_RIGHT);
+$im = WriteText($im, $WeatherData['lastUpdateDate'], $white, 20, $fontDINNNext, 35, 45,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 20, $fontDINNNext, 600-35, 45,\Imagick::ALIGN_RIGHT);
 
 
 
@@ -263,14 +264,25 @@ $im = WriteText($im, "20h30", $white, 20, $fontDINNNext, 600-45, 45,\Imagick::AL
 $position = 100;
 $width = 100;
 // Weathers du bas 
-for( $i = 0; $i < 5 ;$i++) {
+for( $i = 1; $i < 6 ;$i++) {
+
+    // draw line
+    if($i != 1 && $WeatherData['previsions'][$i]['moment'] == "Matin") {
+      $draw = new \ImagickDraw();
+      $draw->setStrokeColor($whiteTransp);
+      $draw->setFillColor($noColor);
+      $draw->setStrokeWidth(1.5);
+      $draw->line($position-50, 585, $position-50, 720);
+      $im->drawImage($draw);
+    }
+
 
     //titre
-    $im = WriteText($im, "Soirée", $white, 20, $fontDINNNext, $position, 600,\Imagick::ALIGN_CENTER);
+    $im = WriteText($im, $WeatherData['previsions'][$i]['moment'], $white, 20, $fontDINNNext, $position, 600,\Imagick::ALIGN_CENTER);
     // icone
-    $im = WriteText($im, "", $white, 37, $fontWeatherIcon, $position, 660,\Imagick::ALIGN_CENTER);
+    $im = WriteText($im, $WeatherData['previsions'][$i]['iconChar'], $white, 37, $fontWeatherIcon, $position, 660,\Imagick::ALIGN_CENTER);
     //temp
-     $im = WriteText($im, "13°", $white, 20, $fontDINNNextBold, $position, 710,\Imagick::ALIGN_CENTER);
+     $im = WriteText($im, $WeatherData['previsions'][$i]['temperature']."°", $white, 20, $fontDINNNextBold, $position, 710,\Imagick::ALIGN_CENTER);
     $position += $width; // width = 120
 }
 
@@ -286,59 +298,64 @@ for( $i = 0; $i < 5 ;$i++) {
 
     // icone
 
-$leftMargin = 70;
-$topPosition = 335;
-$width = 36;
-$height = 7;
-$margin = 3;
 
-    $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, $topPosition + 15,\Imagick::ALIGN_CENTER);
+if( $WeatherData['precipitations'] != null ) {
 
 
-for( $i = 0; $i < 6 ;$i++) {
-    $draw = new \ImagickDraw();
-    $draw->setFillColor($white);
-    $position = $leftMargin + $i * $width + ($i * $margin);
-    for($x = 0; $x <4; $x++) {
-        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
-        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
-    }
-    $im->drawImage($draw);
-}
+  $leftMargin = 70;
+  $topPosition = 335;
+  $width = 36;
+  $height = 7;
+  $margin = 3;
+
+   $im = WriteText($im, "", $white, 36, $fontWeatherIcon, 55, $topPosition + 15,\Imagick::ALIGN_CENTER);
+
+  // First six rain values 
+  for( $i = 0; $i < 6 ;$i++) {
+      $draw = new \ImagickDraw();
+      $draw->setFillColor($white);
+      $position = $leftMargin + $i * $width + ($i * $margin);
+
+
+      for($x = 0; $x <$WeatherData['precipitations'][$i]['value']; $x++) {
+          $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+          $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+      }
+      $im->drawImage($draw);
+  }
+
+
+  // last three 
+
+  $width = 72;
+  $leftMargin = 304;
+  for( $i = 0; $i < 3 ;$i++) {
+      $draw = new \ImagickDraw();
+      $draw->setFillColor($white);
+      $position = $leftMargin + $i * $width + ($i * $margin);
+      for($x = 0; $x < $WeatherData['precipitations'][$i+6]['value']; $x++) {
+          $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
+          $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
+      }
+      $im->drawImage($draw);
+  }
+
+  // Text 
+  for( $i = 0; $i < 5 ;$i++) {
+      $text  = "";
+      $text .= 1+$i."";
+      $text .= "0min";
+      $textPos = 150 + ($margin + $width ) * $i;
+      $im = WriteText($im, $text, $white, 12, $fontDINNNext, $textPos, $topPosition + 22,\Imagick::ALIGN_CENTER);
+  }
+      // time start
+      $im = WriteText($im, $WeatherData['precipitations'][0]['time'], $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
+      // time end
+      $im = WriteText($im, $WeatherData['precipitations'][8]['time'], $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
 
 
 
-$width = 72;
-$leftMargin = 304;
-for( $i = 0; $i < 3 ;$i++) {
-    $draw = new \ImagickDraw();
-    $draw->setFillColor($white);
-    $position = $leftMargin + $i * $width + ($i * $margin);
-    for($x = 0; $x <4; $x++) {
-        $newTopPosition =  $topPosition - ($x * $height ) - ( $x * $margin);
-        $draw->rectangle($position, $newTopPosition, $position + $width , $newTopPosition+$height);
-    }
-    $im->drawImage($draw);
-
-}
-
-
-
-
-// Text 
-for( $i = 0; $i < 5 ;$i++) {
-    $text  = "";
-    $text .= 1+$i."";
-    $text .= "0min";
-    $textPos = 150 + ($margin + $width ) * $i;
-    $im = WriteText($im, $text, $white, 12, $fontDINNNext, $textPos, $topPosition + 22,\Imagick::ALIGN_CENTER);
-}
-    // time start
-    $im = WriteText($im, "22h30", $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
-    // time end
-    $im = WriteText($im, "23h30", $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
-
-
+} // If there are no precipitationss
 
 
 /* /////////////////////////////////
@@ -360,6 +377,8 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
     $draw = new \ImagickDraw();
     $draw->setFillColor($fillColor);
     $draw->setStrokeWidth(0);
+    //$draw->setStrokeColor("rgba(0, 0, 0, 1)");
+    //    $draw->setStrokeOpacity(.1);
     $draw->setFontSize($fontSize);
     $draw->setFont($font);
     $draw->setTextAlignment($align);
@@ -375,31 +394,6 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
 }
 
 
-
-
-
-
-
-/* /////////////////////////////////
-
-    ICONS
-
-*/ /////////////////////////////////
-
-
-
-
-
-
-$xmlfile = file_get_contents("weathericons.xml");
-$xml = simplexml_load_string($xmlfile,"SimpleXMLElement");
-$iconsList = array();
-foreach($xml->children() as $child) {
-    $att = $child->attributes();
-    $iconsList += array($att->name->__toString() => $child[0]->__toString());
-}
-
-//echo GetIcon($iconsList,"day-showers");
 
 
 
