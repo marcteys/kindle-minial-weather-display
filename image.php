@@ -51,14 +51,16 @@ $raincast = file_get_contents("raincast.json");
 $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
 $JSONDATA = $merged;
 
-$lastUpdate = strtotime($JSONDATA["forecast"]->update_time);
+$lastUpdate = json_decode(file_get_contents("lastUpdate.json"))->update;
 
 
 
 $differenceFromLastUpdate = (strtotime("now") - $lastUpdate);
 
 $forceAPIUpdate = false;
-if($differenceFromLastUpdate > (10 * 60)) $forceAPIUpdate = true;
+if($differenceFromLastUpdate > (10 * 60)) {
+  $forceAPIUpdate = true;
+}
 else if(isset($_GET["force"])) $forceAPIUpdate = true;
 else if(isset($_GET["test"])) $forceAPIUpdate = true;
 
@@ -68,18 +70,21 @@ if($forceAPIUpdate) { // Get The readl data;
 	$raincast = "";
   $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
   $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
+
+   file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
+
      file_put_contents("forecast.json", $forecast);
     file_put_contents("raincast.json", $raincast);
   $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
   $JSONDATA = $merged;
+
+  if($debug) $debug = "Updated !";
 //http://api.openweathermap.org/data/2.5/forecast?q=Paris&appid=6522a661efd99b0d7e3c9095e8bb0b0b&units=metric
-} 
+}  else {
+    if($debug) $debug = "Retrieved !";
 
+}
 
-if($debug ) {
-echo '<pre>';
-print_r($JSONDATA);
-echo '</pre>';}
 
 
 /* /////////////////////////////////
@@ -162,13 +167,6 @@ $WeatherData = array(
 
 
 
-if($debug ) {
-
-	echo '<pre>';
-print_r($WeatherData);
-echo '</pre>';
-}
-
 
 
 
@@ -244,6 +242,14 @@ $fontDINNNext = "fonts/D-DIN.ttf";
 $fontDINNNextBold = "fonts/D-DIN-Bold.ttf";
 $fontDINNExp = "fonts/D-DINExp.ttf";
 $fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
+
+
+
+if($debug != "" ||  $debug != null) {
+$im = WriteText($im, $debug, $white, 100, $fontDINNNextBold, 370, 415,\Imagick::ALIGN_CENTER);
+
+}
+
 
 
 // Main temperature
@@ -642,7 +648,19 @@ echo $finalValueJson;
  file_put_contents($file, $finalValueJson);
 
 */
+/*
 
+if($debug ) {
+echo '<pre>';
+print_r($JSONDATA);
+echo '</pre>';}
 
+if($debug ) {
 
+  echo '<pre>';
+print_r($WeatherData);
+echo '</pre>';
+}
+
+*/
 ?>
