@@ -1,9 +1,9 @@
 #!/bin/sh
 
-INTERVAL=60                             # (sec) - how often to update the script
+INTERVAL=1800                           # (sec) - how often to update the script // every 30min
 IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-image.png" # URL of image to fetch. Keep in mind that the Kindle 4 does not support SSL/TLS requests
 CLEAR_SCREEN_BEFORE_RENDER=0            # If "1", then the screen is completely cleared before rendering the newly fetched image to avoid "shadows".
-INTERVAL_ON_ERROR=30                    # In case of errors, the device waits this long until the next loop.
+INTERVAL_ON_ERROR=300                   # (300 = 5min) In case of errors, the device waits this long until the next loop.
 BATTERYALERT=15                         # if the battery level is equal to or below this threshold, a info will be displayed
 BATTERYLOW=5                            # if the battery level is equal to or below this threshold, the "please charge" image will be shown and the device will sleep for a long time until it checks again (or boots up and starts the script again)
 BATTERYSLEEP=3600                       # 1 day sleep time when Battery Level is equal or below the "BATTERYLOW" threshold, see above.
