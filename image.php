@@ -273,6 +273,20 @@ $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 20, $fontDINNNext, 
 
 
 
+
+
+
+// dégradé
+$imagick2 = new Imagick();
+//$imagick2->newPseudoImage(600, 300, 'gradient:white-black');
+$imagick2->newPseudoImage(600, 300, 'gradient:#ffffff-#555555');
+
+// Composite images by BLEND model.
+$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 500);
+
+
+
+
 $position = 100;
 $width = 100;
 // Weathers du bas 
