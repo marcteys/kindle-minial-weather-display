@@ -72,6 +72,7 @@ if($forceAPIUpdate) { // Get The readl data;
   $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
 
    file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
+  $lastUpdate = strtotime("now");
 
      file_put_contents("forecast.json", $forecast);
     file_put_contents("raincast.json", $raincast);
@@ -136,9 +137,11 @@ array_push($PrecipitationsData, $prec);
 
 
 
-
 $PrevisionsData = array();
 for($i = 0; $i < 6; $i++) {
+  $momentText = ucwords($JSONDATA["forecast"]->properties->forecast[$i]->moment_day,'-');
+if($momentText == "Après-Midi") $momentText = "Aprèm'";
+
   $DayData = array(
   "temperature" => round($JSONDATA["forecast"]->properties->forecast[$i]->T),
   "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
@@ -149,7 +152,7 @@ for($i = 0; $i < 6; $i++) {
   							   $JSONDATA["forecast"]->properties->forecast[$i]->moment_day == "Nuit"
   							),
   "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
-  "moment" => ucwords($JSONDATA["forecast"]->properties->forecast[$i]->moment_day,'-')
+  "moment" => $momentText
 );
   array_push($PrevisionsData, $DayData);
 }
@@ -223,6 +226,23 @@ $im->cropThumbnailImage( 600, 800 );
 
 
 
+// dégradé haut 
+$imagick2 = new Imagick();
+//$imagick2->newPseudoImage(600, 300, 'gradient:white-black');
+$imagick2->newPseudoImage(600, 100, 'gradient:#bbbbbb-#ffffff');
+// Composite images by BLEND model.
+$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 0);
+
+
+
+
+
+// dégradé Bas 
+$imagick2 = new Imagick();
+//$imagick2->newPseudoImage(600, 300, 'gradient:white-black');
+$imagick2->newPseudoImage(600, 280, 'gradient:#ffffff-#555555');
+// Composite images by BLEND model.
+$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
 
 
 
@@ -246,29 +266,31 @@ $fontWeatherIcon = "fonts/weathericons-regular-webfont.ttf";
 
 
 if($debug != "" ||  $debug != null) {
-$im = WriteText($im, $debug, $white, 100, $fontDINNNextBold, 370, 415,\Imagick::ALIGN_CENTER);
-
+  $im = WriteText($im, $debug, $white, 100, $fontDINNNextBold, 370, 415,\Imagick::ALIGN_CENTER);
 }
 
 
 
 // Main temperature
-$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 100, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
 // Main temperature text
-$im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 30, $fontDINNNext, 300, 275,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 40, $fontDINNNext, 300, 285,\Imagick::ALIGN_CENTER);
 
 
 // minTemp
-$im = WriteText($im, $WeatherData['previsions'][0]['minTemperature']."°", $whiteTransp, 32, $fontDINNExp, 450, 170,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['minTemperature']."°", $whiteTransp, 40, $fontDINNExp, 450, 165,\Imagick::ALIGN_LEFT);
 // maxTemp
-$im = WriteText($im, $WeatherData['previsions'][0]['maxTemperature']."°", $white, 32, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['maxTemperature']."°", $white, 40, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
 
-// Main Weather
-$im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 80, $fontWeatherIcon, 210, 215,\Imagick::ALIGN_CENTER  );
+// Main Weather Icon
+$im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 95, $fontWeatherIcon, 200, 215,\Imagick::ALIGN_CENTER  );
+
+
+
 
 // Date
-$im = WriteText($im, $WeatherData['lastUpdateDate'], $white, 20, $fontDINNNext, 35, 45,\Imagick::ALIGN_LEFT);
-$im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 20, $fontDINNNext, 600-35, 45,\Imagick::ALIGN_RIGHT);
+$im = WriteText($im, $WeatherData['lastUpdateDate'], $white, 27, $fontDINNNext, 35, 50,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 600-35, 50,\Imagick::ALIGN_RIGHT);
 
 
 
@@ -276,19 +298,10 @@ $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 20, $fontDINNNext, 
 
 
 
-// dégradé
-$imagick2 = new Imagick();
-//$imagick2->newPseudoImage(600, 300, 'gradient:white-black');
-$imagick2->newPseudoImage(600, 300, 'gradient:#ffffff-#555555');
 
-// Composite images by BLEND model.
-$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 500);
-
-
-
-
-$position = 100;
-$width = 100;
+$position = 85; // 60 + 25
+$width = 110;
+$basePosition = 630;
 // Weathers du bas 
 for( $i = 1; $i < 6 ;$i++) {
 
@@ -297,18 +310,17 @@ for( $i = 1; $i < 6 ;$i++) {
       $draw = new \ImagickDraw();
       $draw->setStrokeColor($whiteTransp);
       $draw->setFillColor($noColor);
-      $draw->setStrokeWidth(1.5);
-      $draw->line($position-50, 585, $position-50, 720);
+      $draw->setStrokeWidth(2.5);
+      $draw->line($position- ($width / 2 ), $basePosition - 25 , $position- ($width / 2 ), $basePosition + 115);
       $im->drawImage($draw);
     }
 
-
     //titre
-    $im = WriteText($im, $WeatherData['previsions'][$i]['moment'], $white, 20, $fontDINNNext, $position, 600,\Imagick::ALIGN_CENTER);
+    $im = WriteText($im, $WeatherData['previsions'][$i]['moment'], $white, 27, $fontDINNNext, $position, $basePosition,\Imagick::ALIGN_CENTER);
     // icone
-    $im = WriteText($im, $WeatherData['previsions'][$i]['iconChar'], $white, 37, $fontWeatherIcon, $position, 660,\Imagick::ALIGN_CENTER);
+    $im = WriteText($im, $WeatherData['previsions'][$i]['iconChar'], $white, 45, $fontWeatherIcon, $position,  $basePosition + 60,\Imagick::ALIGN_CENTER);
     //temp
-     $im = WriteText($im, $WeatherData['previsions'][$i]['temperature']."°", $white, 20, $fontDINNNextBold, $position, 710,\Imagick::ALIGN_CENTER);
+     $im = WriteText($im, $WeatherData['previsions'][$i]['temperature']."°", $white, 27, $fontDINNNextBold, $position,  $basePosition + 110,\Imagick::ALIGN_CENTER);
     $position += $width; // width = 120
 }
 
