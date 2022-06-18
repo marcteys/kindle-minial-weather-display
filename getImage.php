@@ -1,9 +1,35 @@
 <?php 
 
+try {
+
 include("image.php");
+    $fileHandle = fopen("weatherImage.png", "w");
+    $im->writeImageFile( $fileHandle);
+
+    error_log("p", 3, $log_file);
+
+}
+catch (\Exception $e) {
+   // echo "lol";
+}
+catch (\Throwable $e) {
+  //  echo "lol";
+}
+
+
+
 
 //$im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
 $im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
+$im = $im->fxImage('intensity');
+
+
+
+
+    
+error_log("q", 3, $log_file);
+
+//$im->posterizeimage(16, 'true');
 
 
 // add the "Content-type" header
@@ -27,6 +53,14 @@ $im->setImageFormat("png");
 // Strip out unneeded meta data
 $im->stripImage();
  
+
+
+
+
+ error_log("r ", 3, $log_file);
+ error_log(strtotime('now'), 3, $log_file);
+
+
 echo $im;
 exit;
 

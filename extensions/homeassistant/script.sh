@@ -130,6 +130,7 @@ while true; do
             logger "Ping worked successfully"
 
             echo "Downloading and drawing image"
+            logger "Downloading and drawing image..."
             DOWNLOADRESULT=$(wget -q "$IMAGE_URI" -O $TMPFILE)
             logger "Download result ${DOWNLOADRESULT}"
             echo $DOWNLOADRESULT

@@ -11,6 +11,14 @@
 //$content = file_get_contents($url);
 
 
+// path of the log file where errors need to be logged
+$log_file = "./my-errors.log";
+
+
+
+
+
+
 
 /* ///////////////////
 
@@ -24,13 +32,16 @@ setlocale(LC_TIME, "fr_FR", "French");
 $today = new DateTime('now', new DateTimeZone('Europe/Paris'));
 $todayString = $today->format('Y-m-d H:i:s');
 
-
-
+error_log("\r\n", 3, $log_file);
+error_log("Time: " . strtotime('now') . " ", 3, $log_file);
+error_log("(" . $todayString . ") =>", 3, $log_file);
+error_log("a", 3, $log_file);
 
 $debug = isset($_GET["debug"]);
 $export = isset($_GET["export"]);
 
 
+error_log("b", 3, $log_file);
 
 
 /* ///////////////////
@@ -54,6 +65,7 @@ $JSONDATA = $merged;
 $lastUpdate = json_decode(file_get_contents("lastUpdate.json"))->update;
 
 
+error_log("c", 3, $log_file);
 
 $differenceFromLastUpdate = (strtotime("now") - $lastUpdate);
 
@@ -86,6 +98,7 @@ if($forceAPIUpdate) { // Get The readl data;
 
 }
 
+error_log("d", 3, $log_file);
 
 
 /* /////////////////////////////////
@@ -110,6 +123,7 @@ foreach($xml->children() as $child) {
 
 
 
+error_log("e", 3, $log_file);
 
 
 
@@ -135,6 +149,7 @@ array_push($PrecipitationsData, $prec);
 
 
 
+error_log("f", 3, $log_file);
 
 
 $PrevisionsData = array();
@@ -168,6 +183,7 @@ $WeatherData = array(
 
 
 
+error_log("g", 3, $log_file);
 
 
 
@@ -212,8 +228,9 @@ if(!is_dir($imagesDir)) $imagesDir = 'Photos/cloud/';
 $images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
 $randomImageUrl = $images[array_rand($images)]; // See comments
 //echo $randomImageUrl;
-//$randomImageUrl = "Photos/day-sunny/sindy-sussengut-4V3X-GQLwYA-unsplash.jpg";
+$randomImageUrl = "Photos/day-sunny/paul-berthelon-bravo-BGXhuJIbx78-unsplash.jpg";
 
+error_log("h", 3, $log_file);
 
 
 $im = new imagick(realpath($randomImageUrl));
@@ -221,6 +238,7 @@ $imageprops = $im->getImageGeometry();
 $im->setImageCompressionQuality(100);
 $im->cropThumbnailImage( 600, 800 );
 
+error_log("i", 3, $log_file);
 
 
 
@@ -235,6 +253,7 @@ $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 0);
 
 
 
+error_log("j", 3, $log_file);
 
 
 // dégradé Bas 
@@ -270,21 +289,24 @@ if($debug != "" ||  $debug != null) {
 }
 
 
+error_log("k", 3, $log_file);
+
+$topBasePosition = 225;
+
 
 // Main temperature
-$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, 215,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, $topBasePosition,\Imagick::ALIGN_CENTER);
 // Main temperature text
-$im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 40, $fontDINNNext, 300, 285,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 40, $fontDINNNext, 300, $topBasePosition + 75,\Imagick::ALIGN_CENTER);
 
 
 // minTemp
-$im = WriteText($im, $WeatherData['previsions'][0]['minTemperature']."°", $whiteTransp, 40, $fontDINNExp, 450, 165,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['minTemperature']."°", $whiteTransp, 40, $fontDINNExp, 460, $topBasePosition -50,\Imagick::ALIGN_LEFT);
 // maxTemp
-$im = WriteText($im, $WeatherData['previsions'][0]['maxTemperature']."°", $white, 40, $fontDINNExp, 450, 215,\Imagick::ALIGN_LEFT);
+$im = WriteText($im, $WeatherData['previsions'][0]['maxTemperature']."°", $white, 40, $fontDINNExp, 460, $topBasePosition,\Imagick::ALIGN_LEFT);
 
 // Main Weather Icon
-$im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 95, $fontWeatherIcon, 200, 215,\Imagick::ALIGN_CENTER  );
-
+$im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 95, $fontWeatherIcon, 200, $topBasePosition,\Imagick::ALIGN_CENTER  );
 
 
 
@@ -293,10 +315,12 @@ $im = WriteText($im, $WeatherData['lastUpdateDate'], $white, 27, $fontDINNNext, 
 $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 600-35, 50,\Imagick::ALIGN_RIGHT);
 
 
+$im = WriteText($im, date('H\hi', strtotime('now')), $white, 14, $fontDINNNext, 600-35, 67,\Imagick::ALIGN_RIGHT);
 
 
 
 
+error_log("l", 3, $log_file);
 
 
 $position = 85; // 60 + 25
@@ -325,6 +349,7 @@ for( $i = 1; $i < 6 ;$i++) {
 }
 
 
+error_log("m", 3, $log_file);
 
 
 
@@ -362,6 +387,7 @@ if( $WeatherData['precipitations'] != null ) {
       $im->drawImage($draw);
   }
 
+error_log("n", 3, $log_file);
 
   // last three 
 
@@ -403,9 +429,7 @@ if( $WeatherData['precipitations'] != null ) {
 */ /////////////////////////////////
 
 
-
-$fileHandle = fopen("weatherImage.jpg", "w");
-$im->writeImageFile( $fileHandle);
+error_log("o", 3, $log_file);
 
  
 
