@@ -1,5 +1,7 @@
 <?php 
 
+
+
 try {
 
 include("image.php");
@@ -24,9 +26,34 @@ $im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
 $im = $im->fxImage('intensity');
 
 
+$colorSpace   = 3;
+$treeDepth    = 0;
+$dither       = 0;
+$measureError = 0;
+$im->quantizeImage(16, $colorSpace,$treeDepth,$dither,$measureError);
+
+// Now we have reduced the image to NUM_COLORS - what are those colors ?
+$nColors = $im->getImageColors();
 
 
-    
+for ($i=0;$i<$nColors;$i++) {
+       
+$oImPixel = $im->getImageColormapColor($i);
+$aColor = $oImPixel->getColor();
+
+// Convert to RGB hex values
+// --------------------------
+$r = str_pad(dechex($aColor['r']),2,0,STR_PAD_LEFT);
+$g = str_pad(dechex($aColor['g']),2,0,STR_PAD_LEFT);
+$b = str_pad(dechex($aColor['b']),2,0,STR_PAD_LEFT);
+
+} // end for each color
+
+
+
+
+
+
 error_log("q", 3, $log_file);
 
 //$im->posterizeimage(16, 'true');

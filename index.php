@@ -9,7 +9,7 @@
 
   <?php include("image.php"); ?>
   
-<img src="weatherImage.jpg">
+<img src="weatherImage.png">
 
 
 

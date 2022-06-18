@@ -15,11 +15,6 @@
 $log_file = "./my-errors.log";
 
 
-
-
-
-
-
 /* ///////////////////
 
 *   CHECK THE FILES TO SEE THE LAST UPDATE. 
@@ -228,7 +223,12 @@ if(!is_dir($imagesDir)) $imagesDir = 'Photos/cloud/';
 $images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
 $randomImageUrl = $images[array_rand($images)]; // See comments
 //echo $randomImageUrl;
-$randomImageUrl = "Photos/day-sunny/paul-berthelon-bravo-BGXhuJIbx78-unsplash.jpg";
+//$randomImageUrl = "Photos/day-sunny/paul-berthelon-bravo-BGXhuJIbx78-unsplash.jpg";
+
+
+
+
+
 
 error_log("h", 3, $log_file);
 
@@ -239,6 +239,7 @@ $im->setImageCompressionQuality(100);
 $im->cropThumbnailImage( 600, 800 );
 
 error_log("i", 3, $log_file);
+
 
 
 
@@ -262,6 +263,13 @@ $imagick2 = new Imagick();
 $imagick2->newPseudoImage(600, 280, 'gradient:#ffffff-#555555');
 // Composite images by BLEND model.
 $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
+
+
+
+
+
+
+
 
 
 
@@ -581,11 +589,10 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
 }
 
 
+
+
+
 /*
-
-
-
-
 
 $time = date("H");
 $timezone = date("e");
