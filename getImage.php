@@ -1,15 +1,12 @@
 <?php 
 
 
+include("image.php");
 
 try {
 
-include("image.php");
-    $fileHandle = fopen("weatherImage.png", "w");
-    $im->writeImageFile( $fileHandle);
 
     error_log("p", 3, $log_file);
-
 }
 catch (\Exception $e) {
    // echo "lol";
@@ -18,17 +15,15 @@ catch (\Throwable $e) {
   //  echo "lol";
 }
 
-
-
-
 //$im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
 $im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
 $im = $im->fxImage('intensity');
 
 
-$colorSpace   = 3;
-$treeDepth    = 0;
-$dither       = 0;
+
+$colorSpace   = 30;
+$treeDepth    = 10;
+$dither       = 20;
 $measureError = 0;
 $im->quantizeImage(16, $colorSpace,$treeDepth,$dither,$measureError);
 
@@ -58,6 +53,8 @@ error_log("q", 3, $log_file);
 
 //$im->posterizeimage(16, 'true');
 
+    $fileHandle = fopen("weatherImage.png", "w");
+    $im->writeImageFile( $fileHandle);
 
 // add the "Content-type" header
 header('Content-type: image/png'); 
@@ -84,8 +81,8 @@ $im->stripImage();
 
 
 
- error_log("r ", 3, $log_file);
- error_log(strtotime('now'), 3, $log_file);
+error_log("r ", 3, $log_file);
+error_log(strtotime('now'), 3, $log_file);
 
 
 echo $im;

@@ -1,7 +1,7 @@
 #!/bin/sh
 
-INTERVAL=1200                           # (sec) - how often to update the script // 1800 = every 30min  - 1200 = 20min
-IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-image.png" # URL of image to fetch. Keep in mind that the Kindle 4 does not support SSL/TLS requests
+INTERVAL=120                           # (sec) - how often to update the script // 1800 = every 30min  - 1200 = 20min
+IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-imae.png" # URL of image to fetch. Keep in mind that the Kindle 4 does not support SSL/TLS requests
 CLEAR_SCREEN_BEFORE_RENDER=0            # If "1", then the screen is completely cleared before rendering the newly fetched image to avoid "shadows".
 INTERVAL_ON_ERROR=300                   # (300 = 5min) In case of errors, the device waits this long until the next loop.
 BATTERYALERT=15                         # if the battery level is equal to or below this threshold, a info will be displayed
@@ -11,7 +11,7 @@ PINGHOST="www.google.com"               # which domain (or IP) to ping to check 
 ROUTERIP="192.168.2.1"                  # router gateway IP. The Kindle appears to sometimes forget the gateway's IP and we need to set this manually.
 LOGGING=1                               # if enabled, the script logs into a file
 DELAY_BEFORE_SUSPEND=10                 # seconds to wait between drawing image and suspending. This gives you time to SSH into your device if it's inside the photo frame and stop the daemon
-RESTART_POWERD_THRESHOLD=50 # restart powerd if battery percentage is below this value, if a power source is connected and the charging current is negative
+RESTART_POWERD_THRESHOLD=50 			# restart powerd if battery percentage is below this value, if a power source is connected and the charging current is negative
 
 NAME=homeassistant
 NAMEOLD=homeassistant_old
@@ -28,5 +28,5 @@ LIMGERRWIFI="${SCRIPTDIR}/wifi.png"
 TMPFILE="${SCRIPTDIR}/cover.temp.png"
 SCREENSAVERFILE="${SCRIPTDIR}/cover.png"
 
-USE_RTC=1 # if 0, only sleep will be used (which is useful for debugging)
+USE_RTC=0 # if 0, only sleep will be used (which is useful for debugging)
 RTC=1     # use rtc1 by default

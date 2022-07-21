@@ -132,6 +132,17 @@ while true; do
             echo "Downloading and drawing image"
             logger "Downloading and drawing image..."
             DOWNLOADRESULT=$(wget -q "$IMAGE_URI" -O $TMPFILE)
+            #failures=0
+            #while [ $failures -lt 10 ]; do
+            # DOWNLOADRESULT=$(wget -t 0 -q "$IMAGE_URI" -O $TMPFILE)
+            # if [ "$?" = 0 ]; then
+            #  break
+            # else
+            #  let failures=failures+1
+            #  sleep 6
+            # fi
+            #done
+            logger "Downloading done."
             logger "Download result ${DOWNLOADRESULT}"
             echo $DOWNLOADRESULT
             if $DOWNLOADRESULT; then

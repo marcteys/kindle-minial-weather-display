@@ -234,8 +234,15 @@ error_log("h", 3, $log_file);
 
 
 $im = new imagick(realpath($randomImageUrl));
+
+error_log(realpath($randomImageUrl), 3, $log_file);
+
 $imageprops = $im->getImageGeometry();
+error_log("h2", 3, $log_file);
+
 $im->setImageCompressionQuality(100);
+error_log("h3", 3, $log_file);
+
 $im->cropThumbnailImage( 600, 800 );
 
 error_log("i", 3, $log_file);
@@ -529,9 +536,9 @@ function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) 
     else if($icon == 'pluies orageuses') return 'thunderstorm';
     else if($icon == 'averses orageuses') return 'thunderstorm';
     else if($icon == 'ciel voile') return 'cloud';
-    else if($icon == 'ciel voile nuit') return 'cloud';
-    else if($icon == 'eclaircies') return 'cloud';
-    else if($icon == 'peu nuageux') return 'cloud';
+    else if($icon == 'ciel voile nuit') return 'night-alt-cloudy';
+    else if($icon == 'eclaircies') return 'day-cloudy';
+    else if($icon == 'peu nuageux') return 'day-sunny-overcast';
     else if($icon == 'pluie forte') return 'rain';
     else if($icon == 'bruine / pluie faible') return 'showers';
     else if($icon == 'bruine') return 'showers';
