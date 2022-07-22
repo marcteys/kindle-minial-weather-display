@@ -128,6 +128,7 @@ error_log("e", 3, $log_file);
 
 // Get Precipitations
 
+
 $PrecipitationsData = array();
 $PrecipitationSum = 0;
 for($i = 0; $i < 9; $i++) {
@@ -138,9 +139,8 @@ for($i = 0; $i < 9; $i++) {
     "value" => $JSONDATA["raincast"]->properties->forecast[$i]->rain_intensity,
   );
   $PrecipitationSum += $JSONDATA["raincast"]->properties->forecast[$i]->rain_intensity;
-array_push($PrecipitationsData, $prec);
+  array_push($PrecipitationsData, $prec);
 }
-
 
 
 
@@ -168,18 +168,19 @@ if($momentText == "Après-Midi") $momentText = "Aprèm'";
 }
 
 
+
 // From top to bottom
 $WeatherData = array(
   "lastUpdateDate" => ucwords(strftime('%A %e %B')),
   "lastUpdateTime" => date('H\hi', $lastUpdate),
-  "precipitations" => $PrecipitationSum != 9 ? $PrevisionsData : null, // false if none
+  "precipitations" => $PrecipitationSum != 9 ? $PrecipitationsData : null, // false if none
   "previsions" => $PrevisionsData, // false if none
 );
 
 
 
-error_log("g", 3, $log_file);
 
+error_log("g", 3, $log_file);
 
 
 
@@ -274,6 +275,29 @@ $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
 
 
 
+// dégradé Milieu 
+
+  /*  $draw = new \ImagickDraw();
+    $draw->rectangle(110, 110, 510, 250);
+    $im->drawImage($draw);*/
+
+  $imagickCrop = new Imagick();
+  $imagickCrop = clone $im;
+  $imagickCrop->cropImage(400, 140, 110,110);
+  $imagickCrop->resizeImage(1,1,Imagick::FILTER_LANCZOS, 1, true);
+  $pixel = $imagickCrop->getImagePixelColor(1,1);
+  $colors = $pixel->getHSL();
+  //print_r($colors); // produces Array([r]=>255,[g]=>255,[b]=>255,[a]=>1); 
+
+if($colors["luminosity"] > 0.6) 
+{  $imagick2 = new Imagick();
+$imagick2->newPseudoImage(600, 100, 'gradient:#ffffff-#bbbbbb');
+$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 100);
+$imagick2->newPseudoImage(600, 100, 'gradient:#bbbbbb-#ffffff');
+$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 200);
+}
+
+// dégradé Milieu 
 
 
 
@@ -290,7 +314,8 @@ $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
 
 $white = "rgba(255, 255, 255,1)";
 $whiteTransp = "rgba(255, 255, 255,0.5)";
-$blackStroke = "rgba(0, 0, 0,0.5)";
+$blackStroke = "rgba(0, 0, 0, 0.5)";
+$blackTransp = "rgba(0, 0, 0, 0.2)";
 $noColor = "rgba(255, 255, 255,0)";
 $fontDINNNext = "fonts/D-DIN.ttf";
 $fontDINNNextBold = "fonts/D-DIN-Bold.ttf";
@@ -310,7 +335,15 @@ $topBasePosition = 225;
 
 
 // Main temperature
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 365, $topBasePosition,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition-5,\Imagick::ALIGN_CENTER);
+$im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition+5,\Imagick::ALIGN_CENTER);
+
+
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, $topBasePosition,\Imagick::ALIGN_CENTER);
+
+
 // Main temperature text
 $im = WriteText($im, $WeatherData['previsions'][0]['weatherText'], $white, 40, $fontDINNNext, 300, $topBasePosition + 75,\Imagick::ALIGN_CENTER);
 
