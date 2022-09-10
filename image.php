@@ -178,7 +178,20 @@ $WeatherData = array(
 );
 
 
+file_put_contents("all.json",  print_r($WeatherData,true));
 
+
+if (empty($WeatherData)) {
+  file_put_contents("all.json", "empty");
+}
+if (!isset($WeatherData)) {
+  file_put_contents("all.json", "isset");
+}
+if (strlen(print_r($WeatherData,true)) < 30)  {
+  file_put_contents("all.json", "strlen");
+}
+
+file_put_contents("last.json",  date("l jS \of F Y h:i:s A"));
 
 error_log("g", 3, $log_file);
 
@@ -224,7 +237,8 @@ if(!is_dir($imagesDir)) $imagesDir = 'Photos/cloud/';
 $images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
 $randomImageUrl = $images[array_rand($images)]; // See comments
 //echo $randomImageUrl;
-//$randomImageUrl = "Photos/day-sunny/paul-berthelon-bravo-BGXhuJIbx78-unsplash.jpg";
+//$randomImageUrl = "Photos/cloud/ryan-kwok--JykOQ7R2Ls-unsplash.jpg";
+$randomImageUrl = "Photos/cloudy/tony-wallstrom-_nkcMamrvhU-unsplash.jpg";
 
 
 
@@ -283,20 +297,25 @@ $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
 
   $imagickCrop = new Imagick();
   $imagickCrop = clone $im;
-  $imagickCrop->cropImage(400, 140, 110,110);
-  $imagickCrop->resizeImage(1,1,Imagick::FILTER_LANCZOS, 1, true);
+  $imagickCrop->cropImage(400, 140, 110,220);
+
+ // $imagickCrop->resizeImage(1,1,Imagick::FILTER_LANCZOS, 1, true);
   $pixel = $imagickCrop->getImagePixelColor(1,1);
   $colors = $pixel->getHSL();
-  //print_r($colors); // produces Array([r]=>255,[g]=>255,[b]=>255,[a]=>1); 
+//print_r($colors); // produces Array([r]=>255,[g]=>255,[b]=>255,[a]=>1); 
+//print_r($colors["luminosity"]);
+//$a = fopen("a.png", "w");
+//$imagickCrop->writeImageFile( $a);
 
-if($colors["luminosity"] > 0.6) 
-{  $imagick2 = new Imagick();
-$imagick2->newPseudoImage(600, 100, 'gradient:#ffffff-#bbbbbb');
-$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 100);
-$imagick2->newPseudoImage(600, 100, 'gradient:#bbbbbb-#ffffff');
-$im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 200);
+if($colors["luminosity"] > 0.54) 
+{ 
+
+   $imagick2 = new Imagick();
+  $imagick2->newPseudoImage(600, 100, 'gradient:#ffffff-#aaaaaa');
+  $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 100);
+  $imagick2->newPseudoImage(600, 200, 'gradient:#aaaaaa-#ffffff');
+  $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY , 0, 200);
 }
-
 // dégradé Milieu 
 
 
@@ -335,11 +354,12 @@ $topBasePosition = 225;
 
 
 // Main temperature
+/* // SHADOWS
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 365, $topBasePosition,\Imagick::ALIGN_CENTER);
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition,\Imagick::ALIGN_CENTER);
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition-5,\Imagick::ALIGN_CENTER);
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition+5,\Imagick::ALIGN_CENTER);
-
+*/
 
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, $topBasePosition,\Imagick::ALIGN_CENTER);
 
@@ -755,9 +775,4 @@ echo '</pre>';}
 if($debug ) {
 
   echo '<pre>';
-print_r($WeatherData);
-echo '</pre>';
-}
-
-*/
-?>
+print_r($WeatherData */
