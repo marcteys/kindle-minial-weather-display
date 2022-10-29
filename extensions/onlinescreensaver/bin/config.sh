@@ -6,13 +6,16 @@
 SCRIPTDIR="/mnt/us/extensions/onlinescreensaver"
 
 
+# Automatically go in screen saver mode.
+FORCE_SCREENSAVER=1
+
 
 # Interval in MINUTES in which to update the screensaver by default. This
 # setting will only be used if no schedule (see below) fits. Note that if the
 # update fails, the script is not updating again until INTERVAL minutes have
 # passed again. So chose a good compromise between updating often (to make
 # sure you always have the latest image) and rarely (to not waste battery).
-DEFAULTINTERVAL=1
+DEFAULTINTERVAL=2
 
 # Schedule for updating the sczreensaver. Use checkschedule.sh to check whether
 # the format is correctly understood. 

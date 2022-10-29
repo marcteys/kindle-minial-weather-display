@@ -34,10 +34,17 @@ logger "Set CPU scaling governer to powersave"
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 # Prevent screensaver (?)
-logger "Set prevent screen saver to true"
-lipc-set-prop com.lab126.powerd preventScreenSaver 1
+#logger "Set prevent screen saver to true"
+#lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
-
+if [ 1 -eq $FORCE_SCREENSAVER ]; then
+	lipc-get-prop com.lab126.powerd status | grep "Screen Saver" 
+	if [ $? -eq 1 ]
+	then
+		powerd_test -p
+		# simulate power button to go into screensaver mode
+	fi
+fi
 
 # enable wireless if it is currently off
 if [ 0 -eq `lipc-get-prop com.lab126.cmd wirelessEnable` ]; then
