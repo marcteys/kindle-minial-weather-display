@@ -56,7 +56,13 @@ wait_for () {
 				# in screensaver mode
 				logger "go to sleep for $REMAININGWAITTIME seconds, wlan off"
 				lipc-set-prop com.lab126.cmd wirelessEnable 0
-				/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem
+				if [ ${USE_RTC} -eq 1 ]; then
+					logger "Sleep: RTC"
+					/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem
+		        else
+		        	logger "Sleep: sleep function"
+		            sleep $INTERVAL_ON_ERROR
+		        fi
 				logger "woke up again"
 				logger "Finished waiting, switch wireless back on"
 				lipc-set-prop com.lab126.cmd wirelessEnable 1

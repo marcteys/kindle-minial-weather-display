@@ -11,14 +11,15 @@ cd "$(dirname "$0")"
 if [ -e "config.sh" ]; then
 	source ./config.sh
 else
-	TMPFILE=/tmp/tmp.onlinescreensaver.png
+	logger "Could not find config.sh"
+	TMPFILE=/mnt/us/extensions/onlinescreensaver/tmp.onlinescreensaver.png
 fi
 
 # load utils
 if [ -e "utils.sh" ]; then
 	source ./utils.sh
 else
-	echo "Could not find utils.sh in `pwd`"
+	logger "Could not find utils.sh"
 	exit
 fi
 
@@ -27,6 +28,16 @@ if [ -z $IMAGE_URI ]; then
 	logger "No image URL has been set. Please edit config.sh."
 	return
 fi
+
+# Set Powersave
+logger "Set CPU scaling governer to powersave"
+echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+
+# Prevent screensaver (?)
+logger "Set prevent screen saver to true"
+lipc-set-prop com.lab126.powerd preventScreenSaver 1
+
+
 
 # enable wireless if it is currently off
 if [ 0 -eq `lipc-get-prop com.lab126.cmd wirelessEnable` ]; then
@@ -62,10 +73,27 @@ if [ 1 -eq $CONNECTED ]; then
                 lipc-get-prop com.lab126.powerd status | grep "Screen Saver" && (
                      logger "Updating image on screen"
                      eips -f -g $SCREENSAVERFILE
-                     batt=`powerd_test -s | awk -F: '/Battery Level/ {print $2}'`
-                     eips 20 1 "Batterie:$batt"
+
+                     CHARGING_FILE=`kdb get system/driver/charger/SYS_CHARGING_FILE`
+                     IS_CHARGING=$(cat $CHARGING_FILE)
+                     CHECKBATTERY=$(gasgauge-info -s | sed 's/.$//')
+                     CHECKCHARGECURRENT=$(gasgauge-info -l | sed 's/mA//g')
+    
+                     logger "Battery: isCharging=${IS_CHARGING} percentage=${CHECKBATTERY}% current=${CHECKCHARGECURRENT}mA"
+                     if [ ${CHECKBATTERY} -le ${BATTERYLOW} ]; then
+			      	logger "Battery below ${BATTERYLOW}"
+			      	eips -f -g "${BATTERY_LOW_IMAGE}"
+			      	
+			      	#Display Text
+			      	if [ 1 -eq $BATTERY_TEXT_DISPLAY ]; then
+			      	 	batt=`powerd_test -s | awk -F: '/Battery Level/ {print $2}'`
+                          	eips 20 1 "Batterie:$batt"
+                          fi
+                     else
+			      	logger "Remaining battery ${CHECKBATTERY}"
+                     fi
                 )
-	else
+	 
 		logger "Error updating screensaver"
 		if [ 1 -eq $DONOTRETRY ]; then
 			touch $SCREENSAVERFILE

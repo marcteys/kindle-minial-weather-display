@@ -29,7 +29,7 @@ DEFAULTINTERVAL=1
 #
 # Use the checkschedule.sh script to verify that the setting is correct and
 # which would be the active interval.
-#SCHEDULE="00:00-06:00=240 06:00-22:00=120 22:00-24:00=240"
+#SCHEDULE="00:00-06:00=480 06:00-18:00=15 18:00-24:00=30"
 
 # URL of screensaver image. This really must be in the EXACT resolution of
 # your Kindle's screen (e.g. 600x800 or 758x1024) and really must be PNG.
@@ -50,7 +50,7 @@ LOGGING=1
 # Where to log to - either /dev/stderr for console output, or an absolute
 # file path (beware that this may grow large over time!)
 L#OGFILE=/dev/stderr
-LOGFILE=/mnt/us/extensions/onlinescreensaver/diags/onlinescreensaver.log
+LOGFILE=/mnt/us/extensions/onlinescreensaver/onlinescreensaver.log
 
 # whether to disable WiFi after the script has finished (if WiFi was off
 # when the script started, it will always turn it off)
@@ -74,12 +74,10 @@ NETWORK_TIMEOUT=30
 
 
 # show battery level?
-BATTERY_DISPLAY=0
+BATTERY_TEXT_DISPLAY=1
+BATTERY_LOW_IMAGE="/mnt/us/extensions/onlinescreensaver/low_battery.png"
 
 BATTERY_LOW=5
-
-# sleep extra for 30 seconds to give the kindle time to update his battery status
-EXTRASLEEP=1
 
 # add Batt level to URI as query string
 DO_QUERYSTRING=1
@@ -92,7 +90,9 @@ DO_QUERYSTRING=1
 #############################################################################
 
 # the real-time clock to use (0, 1 or 2)
-RTC=0
+USE_RTC=1 # if 0, only sleep will be used (which is useful for debugging)
+
+RTC=1
 
 # the temporary file to download the screensaver image to
 TMPFILE=/tmp/tmp.onlinescreensaver.png

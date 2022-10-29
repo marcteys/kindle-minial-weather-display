@@ -20,7 +20,7 @@ if [ -e "config.sh" ]; then
 	source ./config.sh
 else
 	# set default values
-	INTERVAL=240
+	INTERVAL=10 #10 minutes
 	RTC=0
 fi
 
