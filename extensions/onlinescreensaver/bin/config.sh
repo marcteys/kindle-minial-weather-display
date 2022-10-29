@@ -2,6 +2,11 @@
 ### ONLINE-SCREENSAVER CONFIGURATION SETTINGS
 #############################################################################
 
+
+SCRIPTDIR="/mnt/us/extensions/onlinescreensaver"
+
+
+
 # Interval in MINUTES in which to update the screensaver by default. This
 # setting will only be used if no schedule (see below) fits. Note that if the
 # update fails, the script is not updating again until INTERVAL minutes have
@@ -9,7 +14,7 @@
 # sure you always have the latest image) and rarely (to not waste battery).
 DEFAULTINTERVAL=1
 
-# Schedule for updating the screensaver. Use checkschedule.sh to check whether
+# Schedule for updating the sczreensaver. Use checkschedule.sh to check whether
 # the format is correctly understood. 
 #
 # The format is a space separated list of settings for different times of day:
@@ -50,7 +55,7 @@ LOGGING=1
 # Where to log to - either /dev/stderr for console output, or an absolute
 # file path (beware that this may grow large over time!)
 L#OGFILE=/dev/stderr
-LOGFILE=/mnt/us/extensions/onlinescreensaver/onlinescreensaver.log
+LOGFILE=${SCRIPTDIR}/onlinescreensaver.log
 
 # whether to disable WiFi after the script has finished (if WiFi was off
 # when the script started, it will always turn it off)
@@ -75,7 +80,7 @@ NETWORK_TIMEOUT=30
 
 # show battery level?
 BATTERY_TEXT_DISPLAY=1
-BATTERY_LOW_IMAGE="/mnt/us/extensions/onlinescreensaver/low_battery.png"
+BATTERY_LOW_IMAGE="${SCRIPTDIR}/low_battery.png"
 
 BATTERY_LOW=5
 
@@ -95,4 +100,4 @@ USE_RTC=1 # if 0, only sleep will be used (which is useful for debugging)
 RTC=1
 
 # the temporary file to download the screensaver image to
-TMPFILE=/tmp/tmp.onlinescreensaver.png
+TMPFILE=${SCRIPTDIR}/tmp.onlinescreensaver.png
