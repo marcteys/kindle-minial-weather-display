@@ -238,7 +238,7 @@ $images = glob($imagesDir . '*.{jpg,jpeg,png,gif}', GLOB_BRACE);
 $randomImageUrl = $images[array_rand($images)]; // See comments
 //echo $randomImageUrl;
 //$randomImageUrl = "Photos/cloud/ryan-kwok--JykOQ7R2Ls-unsplash.jpg";
-$randomImageUrl = "Photos/cloudy/tony-wallstrom-_nkcMamrvhU-unsplash.jpg";
+//$randomImageUrl = "Photos/cloudy/tony-wallstrom-_nkcMamrvhU-unsplash.jpg";
 
 
 
