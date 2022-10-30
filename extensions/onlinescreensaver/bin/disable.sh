@@ -17,11 +17,11 @@ else
 fi
 
 # forever and ever, try to update the screensaver
-logger "Disabling online screensaver auto-update"
+logger "disable.sh: Disabling online screensaver auto-update"
 
 #stop onlinescreensaver || true      
 PID=`ps xa | grep "/bin/sh /mnt/base-us/extensions/onlinescreensaver/bin/scheduler.sh" | awk '{ print $1 }'`
-logger "killing scheduler process: $PID"
+logger "disable.sh: killing scheduler process: $PID"
 kill $PID || true
 
 #lipc-set-prop com.lab126.cmd wirelessEnable 1

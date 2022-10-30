@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 if [ -e "config.sh" ]; then
 	source ./config.sh
 else
-	logger "Could not find config.sh"
+	logger "update.sh: Could not find config.sh"
 	TMPFILE=/mnt/us/extensions/onlinescreensaver/tmp.onlinescreensaver.png
 fi
 
@@ -19,22 +19,22 @@ fi
 if [ -e "utils.sh" ]; then
 	source ./utils.sh
 else
-	logger "Could not find utils.sh"
+	logger "update.sh: Could not find utils.sh"
 	exit
 fi
 
 # do nothing if no URL is set
 if [ -z $IMAGE_URI ]; then
-	logger "No image URL has been set. Please edit config.sh."
+	logger "update.sh: No image URL has been set. Please edit config.sh."
 	return
 fi
 
 # Set Powersave
-logger "Set CPU scaling governer to powersave"
+logger "update.sh: Set CPU scaling governer to powersave"
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
 # Prevent screensaver (?)
-#logger "Set prevent screen saver to true"
+#logger "update.sh: Set prevent screen saver to true"
 #lipc-set-prop com.lab126.powerd preventScreenSaver 1
 
 if [ 1 -eq $FORCE_SCREENSAVER ]; then
@@ -48,7 +48,7 @@ fi
 
 # enable wireless if it is currently off
 if [ 0 -eq `lipc-get-prop com.lab126.cmd wirelessEnable` ]; then
-	logger "WiFi is off, turning it on now"
+	logger "update.sh: WiFi is off, turning it on now"
 	lipc-set-prop com.lab126.cmd wirelessEnable 1
 	DISABLE_WIFI=1
 fi
@@ -64,7 +64,7 @@ while [ 0 -eq $CONNECTED ]; do
 	if [ 0 -eq $CONNECTED ]; then
 		TIMER=$(($TIMER-1))
 		if [ 0 -eq $TIMER ]; then
-			logger "No internet connection after ${NETWORK_TIMEOUT} seconds, aborting."
+			logger "update.sh: No internet connection after ${NETWORK_TIMEOUT} seconds, aborting."
 			break
 		else
 			sleep 1

@@ -72,7 +72,7 @@ EOF
 	
 	# to handle the day overlap, append the schedule again for hours 24-48.
 	SCHEDULE="$SCHEDULE_ONE $SCHEDULE_TWO"
-	logger "Full two day schedule: $SCHEDULE"
+	logger "scheduler.sh: Full two day schedule: $SCHEDULE"
 }
 
 
@@ -95,18 +95,18 @@ EOF
 
 		# if this schedule entry covers the current time, use it
 		elif [ $CURRENTMINUTE -ge $START ] && [ $CURRENTMINUTE -lt $END ]; then
-			logger "Schedule $schedule used, next update in $INTERVAL minutes"
+			logger "scheduler.sh: Schedule $schedule used, next update in $INTERVAL minutes"
 			NEXTUPDATE=$(( $CURRENTMINUTE + $INTERVAL))
 
 		# if the next update falls into (or overlaps) a following schedule
 		# entry, apply this schedule entry instead if it would trigger earlier
 		elif [ $(( $START + $INTERVAL )) -lt $NEXTUPDATE ]; then
-			logger "Selected timeout will overlap $schedule, applying it instead"
+			logger "scheduler.sh: Selected timeout will overlap $schedule, applying it instead"
 			NEXTUPDATE=$(( $START + $INTERVAL ))
 		fi
 	done
 
-	logger "Next update in $(( $NEXTUPDATE - $CURRENTMINUTE )) minutes"
+	logger "scheduler.sh: Next update in $(( $NEXTUPDATE - $CURRENTMINUTE )) minutes"
 	echo $(( $NEXTUPDATE - $CURRENTMINUTE ))
 }
 

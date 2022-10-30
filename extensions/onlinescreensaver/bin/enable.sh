@@ -17,7 +17,7 @@ else
 fi
 
 if [ -e /etc/upstart ]; then
-	logger "Enabling online screensaver auto-update"
+	logger "enable.sh: Enabling online screensaver auto-update"
 
 	mntroot rw
 	cp onlinescreensaver.conf /etc/upstart/
@@ -25,7 +25,7 @@ if [ -e /etc/upstart ]; then
 
 	start onlinescreensaver
 else
-	logger "Upstart folder not found. upstart file not copied - should implement classic startup script for this kindle"
+	logger "enable.sh: Upstart folder not found. upstart file not copied - should implement classic startup script for this kindle"
 	lipc-get-prop com.lab126.powerd status | grep "Screen Saver" 
 	if [ $? -eq 1 ]
 	then
