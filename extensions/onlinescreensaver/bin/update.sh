@@ -101,7 +101,7 @@ if [ 1 -eq $CONNECTED ]; then
                      fi
                 )
 	 
-		logger "Error updating screensaver"
+		logger "Error updating screensaver. Probably not in sleep mode."
 		if [ 1 -eq $DONOTRETRY ]; then
 			touch $SCREENSAVERFILE
 		fi
