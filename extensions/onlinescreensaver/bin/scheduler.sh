@@ -116,10 +116,12 @@ EOF
 # use a 48 hour schedule
 extend_schedule
 
+logger "scheduler.sh: Starting script."
+
 # forever and ever, try to update the screensaver
 while [ 1 -eq 1 ]; do 
 	sh ./update.sh
 	
 	# wait for the next trigger time
-	wait_for $(( 60 * $(get_time_to_next_update) ))
+	wait_for $(( 60 * $(get_time_to_next_update) )) $USE_RTC $RTC
 done
