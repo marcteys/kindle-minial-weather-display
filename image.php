@@ -78,22 +78,29 @@ if($forceAPIUpdate) { // Get The readl data;
   $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=48.847904&lon=2.379711&id=&instants=morning,afternoon,evening,night&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
   $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=48.847904&lon=2.379711&token=__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__");
 
-   file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
+  file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
   $lastUpdate = strtotime("now");
 
-     file_put_contents("forecast.json", $forecast);
-    file_put_contents("raincast.json", $raincast);
+  file_put_contents("forecast.json", $forecast);
+  file_put_contents("raincast.json", $raincast);
   $merged = array("forecast" => json_decode($forecast), "raincast" => json_decode($raincast) );
   $JSONDATA = $merged;
 
   if($debug) $debug = "Updated !";
 //http://api.openweathermap.org/data/2.5/forecast?q=Paris&appid=6522a661efd99b0d7e3c9095e8bb0b0b&units=metric
 }  else {
-    if($debug) $debug = "Retrieved !";
-
+  if($debug) $debug = "Retrieved !";
 }
 
 error_log("d", 3, $log_file);
+
+
+$batterypercent = "";
+
+if(isset($_GET["battery"])) {
+  $batterypercent=$_GET["battery"];
+}
+
 
 
 /* /////////////////////////////////
@@ -150,20 +157,20 @@ error_log("f", 3, $log_file);
 $PrevisionsData = array();
 for($i = 0; $i < 6; $i++) {
   $momentText = ucwords($JSONDATA["forecast"]->properties->forecast[$i]->moment_day,'-');
-if($momentText == "Après-Midi") $momentText = "Aprèm'";
+  if($momentText == "Après-Midi") $momentText = "Aprèm'";
 
-  $DayData = array(
-  "temperature" => round($JSONDATA["forecast"]->properties->forecast[$i]->T),
-  "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
-  "maxTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_max),
-  "iconText" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
-  "iconChar" => GetIconDrawing($iconsList,
-  							   getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
-  							   $JSONDATA["forecast"]->properties->forecast[$i]->moment_day == "Nuit"
-  							),
-  "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
-  "moment" => $momentText
-);
+    $DayData = array(
+    "temperature" => round($JSONDATA["forecast"]->properties->forecast[$i]->T),
+    "minTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_min),
+    "maxTemperature" => round($JSONDATA["forecast"]->properties->daily_forecast[0]->T_max),
+    "iconText" => getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+    "iconChar" => GetIconDrawing($iconsList,
+    							   getIcones($JSONDATA["forecast"]->properties->forecast[$i]->weather_description),
+    							   $JSONDATA["forecast"]->properties->forecast[$i]->moment_day == "Nuit"
+    							),
+    "weatherText" => $JSONDATA["forecast"]->properties->forecast[$i]->weather_description,
+    "moment" => $momentText
+  );
   array_push($PrevisionsData, $DayData);
 }
 
@@ -333,6 +340,7 @@ if($colors["luminosity"] > 0.54)
 
 $white = "rgba(255, 255, 255,1)";
 $whiteTransp = "rgba(255, 255, 255,0.5)";
+$transp = "rgba(255, 255, 255,0)";
 $blackStroke = "rgba(0, 0, 0, 0.5)";
 $blackTransp = "rgba(0, 0, 0, 0.2)";
 $noColor = "rgba(255, 255, 255,0)";
@@ -361,6 +369,7 @@ $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTr
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $blackTransp, 110, $fontDINNExp, 375, $topBasePosition+5,\Imagick::ALIGN_CENTER);
 */
 
+
 $im = WriteText($im, $WeatherData['previsions'][0]['temperature']."°", $white, 110, $fontDINNExp, 370, $topBasePosition,\Imagick::ALIGN_CENTER);
 
 
@@ -384,6 +393,46 @@ $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 
 
 
 $im = WriteText($im, date('H\hi', strtotime('now')), $white, 14, $fontDINNNext, 600-35, 67,\Imagick::ALIGN_RIGHT);
+
+if($batterypercent != "") {
+  $posX = 270;
+  $posY =28;
+  // Drawing battery icon
+  $draw = new \ImagickDraw();
+  $draw->setFillColor($transp);
+  $draw->setStrokeColor($white);
+  $draw->setStrokeOpacity(1);
+  $draw->setStrokeWidth(2);
+  $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
+  $im->drawImage($draw);
+  $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
+  $im->drawImage($draw);
+
+ /* $draw = new \ImagickDraw();
+  $draw->setFillColor($white);
+  $draw->setStrokeOpacity(1);
+  $draw->setStrokeWidth(2);
+  $draw->roundRectangle($posX + 60, $posY + 15, $posX + 5, $posY + 5, 5, 5);
+  $im->drawImage($draw);*/
+
+  $draw = new \ImagickDraw();
+  $draw->setFillColor($transp);
+  $draw->setStrokeColor($white);
+  $draw->setStrokeOpacity(1);
+  $draw->setStrokeWidth(2);
+  $draw->rectangle($posX + 60,  $posY + 10, $posX +66, $posY + 20);
+  $im->drawImage($draw);
+  $im->drawImage($draw);
+
+
+  $draw = new \ImagickDraw();
+  $draw->setFillColor($white);
+    $draw->setStrokeWidth(0);
+  $draw->rectangle($posX + 5,  $posY + 5, $posX +15, $posY + 25);
+  $im->drawImage($draw);
+
+  $im = WriteText($im, $batterypercent, $white, 24, $fontDINNNext, $posX + 26, $posY + 24,\Imagick::ALIGN_LEFT);
+}
 
 
 

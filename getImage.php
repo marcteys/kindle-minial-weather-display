@@ -12,8 +12,7 @@ catch (\Exception $e) {
 }
 catch (\Throwable $e) {
   //  echo "lol";
-            error_log(" erraaaaaaar ", 3, $log_file);
-
+  error_log(" erraaaaaaar ", 3, $log_file);
 }
 
 //$im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
