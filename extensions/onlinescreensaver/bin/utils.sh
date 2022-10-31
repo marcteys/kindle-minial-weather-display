@@ -34,8 +34,8 @@ currentTime () {
 
 wait_for () { 
 	delay=$1
-	USE_RTC=0
-	RTC=1
+	#USE_RTC=0
+	#RTC=1
 	now=$(currentTime)
 
     if [ "x1" == "x$LOGGING" ]; then
@@ -58,7 +58,7 @@ wait_for () {
 		if [ 0 -lt $REMAININGWAITTIME ]; then
 			sleep 2
 			lipc-get-prop com.lab126.powerd status | grep "Screen Saver" 
-			if [ $? -eq 0 ] #  $? is the result of previous call
+			if [ $? -eq 1 ] #  $? is the result of previous call
 			then
 				# in screensaver mode
 				logger "utils.sh:64: Go to sleep for $REMAININGWAITTIME seconds, wlan off"
@@ -66,10 +66,10 @@ wait_for () {
 				#/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem
 
 				if [ 1 -eq $USE_RTC ]; then
-					logger "utils.sh:69: Sleep using RTC"
+					logger "utils.sh:69: Sleep using RTC for $REMAININGWAITTIME seconds"
 					/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem
 		        else
-		        	logger "utils.sh:72: Sleep using normal sleep function."
+		        	logger "utils.sh:72: Sleep using normal sleep function. for $REMAININGWAITTIME seconds"
 		            sleep $REMAININGWAITTIME
 		        fi
 				logger "utils.sh:75: Woke up again!"
@@ -77,8 +77,9 @@ wait_for () {
 				lipc-set-prop com.lab126.cmd wirelessEnable 1
 			else
 				# not in screensaver mode - don't really sleep with rtcwake
-				logger "utils.sh:80: Not in screensaver mode. Sleeping using normal sleep function."
+				logger "utils.sh:80: Not in screensaver mode. Sleeping using normal sleep function for $REMAININGWAITTIME seconds"
 				sleep $REMAININGWAITTIME
+				logger "utils.sh:82: Wake up from $REMAININGWAITTIME"
 			fi
 		fi
 	done
