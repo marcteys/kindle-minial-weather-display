@@ -8,13 +8,14 @@ SCRIPTDIR="/mnt/us/extensions/onlinescreensaver"
 # Automatically go in screen saver mode.
 FORCE_SCREENSAVER=0
 
+DONOTRETRY=0
 
 # Interval in MINUTES in which to update the screensaver by default. This
 # setting will only be used if no schedule (see below) fits. Note that if the
 # update fails, the script is not updating again until INTERVAL minutes have
 # passed again. So chose a good compromise between updating often (to make
 # sure you always have the latest image) and rarely (to not waste battery).
-DEFAULTINTERVAL=10
+DEFAULTINTERVAL=2
 
 # Schedule for updating the sczreensaver. Use checkschedule.sh to check whether
 # the format is correctly understood. 
@@ -36,12 +37,17 @@ DEFAULTINTERVAL=10
 #
 # Use the checkschedule.sh script to verify that the setting is correct and
 # which would be the active interval.
-SCHEDULE="00:00-06:00=480 06:00-18:00=15 18:00-24:00=30"
+SCHEDULE="00:00-06:00=480 06:00-18:00=1 18:00-24:00=1"
 
 # URL of screensaver image. This really must be in the EXACT resolution of
 # your Kindle's screen (e.g. 600x800 or 758x1024) and really must be PNG.
-#IMAGE_URI="http://enter.the.domain/here/and/the/path/to/the/image.png"
-IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-imae.png"
+#IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-image.png"
+IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weatherImage.png"
+
+GENERATION_URI="http://marcteyssier.com/experiment/epaperWeatherApi/getImage.php"
+
+
+
 
 # folder that holds the screensavers
 SCREENSAVERFOLDER=/mnt/us/linkss/screensavers/
@@ -81,13 +87,16 @@ NETWORK_TIMEOUT=30
 
 
 # show battery level?
-BATTERY_TEXT_DISPLAY=1
+BATTERY_TEXT_DISPLAY=1 
 BATTERY_LOW_IMAGE="${SCRIPTDIR}/low_battery.png"
 
 BATTERY_LOW=5
 
+
 # add Batt level to URI as query string
-DO_QUERYSTRING=1 # /!\ Currently not used nor implemented
+DO_BATTERY_QUERYSTRING=1 
+
+BATTERY_LOW_QUERYSTRING=30 # Bellow this value, the battery will be sent to query string
 
 
 
@@ -99,7 +108,7 @@ DO_QUERYSTRING=1 # /!\ Currently not used nor implemented
 
 
 # /!\ Currently hard coded in the wait_for() function in utils.sh
-USE_RTC=1 # if 0, only sleep will be used (which is useful for debugging)
+USE_RTC=0 # if 0, only sleep will be used (which is useful for debugging)
 # /!\ Currently hard coded in the wait_for() function in utils.sh
 # the real-time clock to use (0, 1 or 2)
 RTC=1
