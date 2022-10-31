@@ -33,9 +33,11 @@ fi
 logger "update.sh: Set CPU scaling governer to powersave"
 echo powersave >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
-# Prevent screensaver (?)
-#logger "update.sh: Set prevent screen saver to true"
-#lipc-set-prop com.lab126.powerd preventScreenSaver 1
+if [ 1 -eq PREVENT_SCREENSAVER ]; then
+	# Prevent screensaver (?)
+	logger "update.sh: Set prevent screen saver to true"
+	lipc-set-prop com.lab126.powerd preventScreenSaver 1
+fi
 
 if [ 1 -eq $FORCE_SCREENSAVER ]; then
 	logger "update.sh forcing screensaver"

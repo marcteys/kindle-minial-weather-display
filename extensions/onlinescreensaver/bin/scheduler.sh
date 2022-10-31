@@ -120,6 +120,7 @@ logger "scheduler.sh: Starting script."
 
 # forever and ever, try to update the screensaver
 while [ 1 -eq 1 ]; do 
+	logger "scheduler.sh: "
 	sh ./update.sh
 	
 	# wait for the next trigger time

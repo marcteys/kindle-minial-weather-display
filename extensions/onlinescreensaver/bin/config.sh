@@ -8,6 +8,9 @@ SCRIPTDIR="/mnt/us/extensions/onlinescreensaver"
 # Automatically go in screen saver mode.
 FORCE_SCREENSAVER=0
 
+PREVENT_SCREENSAVER=1 
+
+
 DONOTRETRY=0
 
 # Interval in MINUTES in which to update the screensaver by default. This
@@ -15,7 +18,7 @@ DONOTRETRY=0
 # update fails, the script is not updating again until INTERVAL minutes have
 # passed again. So chose a good compromise between updating often (to make
 # sure you always have the latest image) and rarely (to not waste battery).
-DEFAULTINTERVAL=2
+DEFAULTINTERVAL=15
 
 # Schedule for updating the sczreensaver. Use checkschedule.sh to check whether
 # the format is correctly understood. 
@@ -37,7 +40,9 @@ DEFAULTINTERVAL=2
 #
 # Use the checkschedule.sh script to verify that the setting is correct and
 # which would be the active interval.
-SCHEDULE="00:00-06:00=480 06:00-18:00=1 18:00-24:00=1"
+#SCHEDULE="00:00-06:00=480 06:00-18:00=1 18:00-24:00=1" #debug
+SCHEDULE="00:00-08:00=60 08:00-10:00=15 10:00-24:00=30" #normal
+
 
 # URL of screensaver image. This really must be in the EXACT resolution of
 # your Kindle's screen (e.g. 600x800 or 758x1024) and really must be PNG.
