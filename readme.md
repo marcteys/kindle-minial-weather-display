@@ -11,8 +11,8 @@ The code source provide the two required components: the code source to be uploa
 * ⚠Currently it is setup to work in French on Paris, but could be easiliy changed.  
 
 
-![Default](https://raw.githubusercontent.com/marcteys/kindle-minial-weather-display/main/sample_images/image1.png)
-![Default](https://raw.githubusercontent.com/marcteys/kindle-minial-weather-display/main/sample_images/image2.png)
+![Default](https://marcteyssier.com/experiment/epaperWeatherApi/sample_images/image1.jpg)
+![Default](https://marcteyssier.com/experiment/epaperWeatherApi/sample_images/image2.jpg)
 
 ## Install
 
@@ -61,4 +61,4 @@ I draw inspiration from various projects.
 - https://www.galacticstudios.org/kindle-weather-display/
 - https://github.com/sibbl/hass-lovelace-kindle-4
 
-![Default](https://raw.githubusercontent.com/marcteys/kindle-minial-weather-display/main/sample_images/image3.png)
+![Default](https://marcteyssier.com/experiment/epaperWeatherApi/sample_images/image3.jpg)
