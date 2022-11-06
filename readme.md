@@ -48,7 +48,6 @@ The main kindle settings are located under `kindle\extensions\onlinescreensaver\
 - Right now, I use the french open weather API. As such, the interface is in french. It should be fairly easy to change the locale or even pass it as argument. 
 
 
-
 ## Inspiration, resources, references 
 
 
