@@ -388,7 +388,8 @@ $im = WriteText($im, $WeatherData['previsions'][0]['iconChar'], $white, 95, $fon
 
 
 // Date
-$im = WriteText($im, $WeatherData['lastUpdateDate'], $white, 27, $fontDINNNext, 35, 50,\Imagick::ALIGN_LEFT);
+$dateWithoutWhiteSpace = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $WeatherData['lastUpdateDate']);
+$im = WriteText($im, $dateWithoutWhiteSpace , $white, 27, $fontDINNNext, 35, 50,\Imagick::ALIGN_LEFT);
 $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 600-35, 50,\Imagick::ALIGN_RIGHT);
 
 
