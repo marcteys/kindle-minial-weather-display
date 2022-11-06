@@ -396,8 +396,8 @@ $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 
 $im = WriteText($im, date('H\hi', strtotime('now')), $white, 14, $fontDINNNext, 600-35, 67,\Imagick::ALIGN_RIGHT);
 
 if($batterypercent != "") {
-  $posX = 270;
-  $posY =28;
+  $posX = 420;
+  $posY =30;
   // Drawing battery icon
   $draw = new \ImagickDraw();
   $draw->setFillColor($transp);
