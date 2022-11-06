@@ -7,3 +7,9 @@ last.json
 weatherImage.png
 raincast.json
 lastUpdate.json
+*.otf
+*.woff
+*.woff2
+*.eot
+*.svg
+kindle/extensions/homeassistant/

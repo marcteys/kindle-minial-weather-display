@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule weather-image.png getImage.php
