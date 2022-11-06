@@ -1,1 +1,0 @@
-C:\MinGW\bin\gcc.exe -g -o fastboot.exe fastboot.c engine.c protocol.c usb_windows.c C:\WINDOWS\system32\libusb0.dll
