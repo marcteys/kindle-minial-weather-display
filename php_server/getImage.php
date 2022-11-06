@@ -1,18 +1,15 @@
 <?php 
+ include("settings.php");
 
 try {
     include("image.php");
-
     error_log("p", 3, $log_file);
 }
 catch (\Exception $e) {
-   // echo "lol";
-        error_log(" errooooor ", 3, $log_file);
-
+    error_log(" error1 ", 3, $log_file);
 }
 catch (\Throwable $e) {
-  //  echo "lol";
-  error_log(" erraaaaaaar ", 3, $log_file);
+  error_log(" error2 ", 3, $log_file);
 }
 
 //$im->setImageType(\Imagick::IMGTYPE_GRAYSCALE);
@@ -43,9 +40,6 @@ $g = str_pad(dechex($aColor['g']),2,0,STR_PAD_LEFT);
 $b = str_pad(dechex($aColor['b']),2,0,STR_PAD_LEFT);
 
 } // end for each color
-
-
-
 
 
 

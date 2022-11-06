@@ -1,17 +1,13 @@
 #############################################################################
 ### ONLINE-SCREENSAVER CONFIGURATION SETTINGS
+### version modified to work on kindle 4.1.1
 #############################################################################
 
-
+# Local kindle folder
 SCRIPTDIR="/mnt/us/extensions/onlinescreensaver"
 
-# Automatically go in screen saver mode.
-FORCE_SCREENSAVER=0
-
-PREVENT_SCREENSAVER=1 
-
-
-DONOTRETRY=0
+# Remote server url. /!\ https is not supported by wget
+SERVERDIR="http://marcteyssier.com/experiment/epaperWeatherApi"
 
 # Interval in MINUTES in which to update the screensaver by default. This
 # setting will only be used if no schedule (see below) fits. Note that if the
@@ -20,7 +16,10 @@ DONOTRETRY=0
 # sure you always have the latest image) and rarely (to not waste battery).
 DEFAULTINTERVAL=15
 
-# Schedule for updating the sczreensaver. Use checkschedule.sh to check whether
+
+
+
+# Schedule for updating the screensaver. Use checkschedule.sh to check whether
 # the format is correctly understood. 
 #
 # The format is a space separated list of settings for different times of day:
@@ -47,19 +46,26 @@ SCHEDULE="00:00-08:00=60 08:00-10:00=15 10:00-24:00=30" #normal
 # URL of screensaver image. This really must be in the EXACT resolution of
 # your Kindle's screen (e.g. 600x800 or 758x1024) and really must be PNG.
 #IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weather-image.png"
-IMAGE_URI="http://marcteyssier.com/experiment/epaperWeatherApi/weatherImage.png"
-
-GENERATION_URI="http://marcteyssier.com/experiment/epaperWeatherApi/getImage.php"
-
+IMAGE_URI=$SERVERDIR"/weatherImage.png"
+GENERATION_URI=$SERVERDIR"/getImage.php"
 
 
+# Automatically go in screen saver mode by triggering a fake button click
+FORCE_SCREENSAVER=0
 
-# folder that holds the screensavers
+# Set prevent screen saver 
+PREVENT_SCREENSAVER=1 
+
+# Retry 
+DONOTRETRY=0
+
+# Folder that holds the screensavers. This can be any folder
 SCREENSAVERFOLDER=/mnt/us/linkss/screensavers/
 
 # In which file to store the downloaded image. Make sure this is a valid
 # screensaver file. E.g. check the current screensaver folder to see what
 # the first filename is, then just use this. THIS FILE WILL BE OVERWRITTEN!
+# This could be any file as long as it ends with .png
 SCREENSAVERFILE=$SCREENSAVERFOLDER/bg_medium_ss00.png
 
 # Whether to create log output (1) or not (0).
@@ -89,19 +95,24 @@ NETWORK_TIMEOUT=30
 # Battery
 #############################################################################
 
+# Add Batt level to URI as query string, to display the icon on the server
+DO_BATTERY_QUERYSTRING=1 
+
+# Bellow this value, the battery will be sent to query string
+BATTERY_LOW_QUERYSTRING=30
 
 
-# show battery level?
+
+
+# Show battery level
 BATTERY_TEXT_DISPLAY=1 
+
+# Image to display
 BATTERY_LOW_IMAGE="${SCRIPTDIR}/low_battery.png"
+
 
 BATTERY_LOW=5
 
-
-# add Batt level to URI as query string
-DO_BATTERY_QUERYSTRING=1 
-
-BATTERY_LOW_QUERYSTRING=30 # Bellow this value, the battery will be sent to query string
 
 
 
