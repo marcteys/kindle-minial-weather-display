@@ -428,10 +428,10 @@ if($batterypercent != "") {
 
   $draw = new \ImagickDraw();
   $draw->setFillColor($white);
-    $draw->setStrokeWidth(0);
-  $draw->rectangle($posX + 5,  $posY + 5, $posX +15, $posY + 25);
+  $draw->setStrokeWidth(0);
+  $draw->rectangle($posX + 5,  $posY + 5, $posX +5 + $batterypercent +1, $posY + 25);
   $im->drawImage($draw);
-
+  
   $im = WriteText($im, $batterypercent, $white, 24, $fontDINNNext, $posX + 26, $posY + 24,\Imagick::ALIGN_LEFT);
 }
 
