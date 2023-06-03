@@ -98,6 +98,10 @@ if [ 1 -eq $CONNECTED ]; then
 	sleep 1 #Wait one second
 	logger "update.sh: Image generated on server. Trying to get it."
 
+	if [ -f $TMPFILE ]; then
+  		rm $TMPFILE
+	fi
+
 	if wget -q $IMAGE_URI -O $TMPFILE > "${SCRIPTDIR}/get.log"; then
 		mv $TMPFILE $SCREENSAVERFILE
 		logger "update.sh: Screen saver image file updated"
