@@ -355,8 +355,51 @@ $im = WriteText($im, $WeatherData['lastUpdateTime'], $white, 27, $fontDINNNext, 
 $im = WriteText($im, date('H\hi', strtotime('now')), $white, 14, $fontDINNNext, 600-35, 67,\Imagick::ALIGN_RIGHT);
 
 if($batterypercent != "") {
+
+
+  // Draw big icon
+  if($batterypercent <= 8) {
+
+      $posX = 225;
+      $posY =355;
+
+      // body
+      $draw = new \ImagickDraw();
+      $draw->setFillColor($transp);
+      $draw->setStrokeColor($white);
+      $draw->setStrokeOpacity(1);
+      $draw->setStrokeWidth(6);
+      $draw->roundRectangle($posX + 0, $posY + 0, $posX + 150, $posY + 70, 5, 5);
+      $im->drawImage($draw);
+      $im->drawImage($draw);
+      //tip
+      $draw = new \ImagickDraw();
+      $draw->setFillColor($transp);
+      $draw->setStrokeColor($white);
+            $draw->setStrokeOpacity(1);
+      $draw->setStrokeWidth(6);
+      $draw->roundRectangle($posX + 150,  $posY + 20, $posX +170, $posY + 50,3,3);
+      $im->drawImage($draw);
+      $im->drawImage($draw);
+
+      // inside
+      $draw = new \ImagickDraw();
+      $draw->setFillColor($white);
+      $draw->setStrokeOpacity(0);
+      $draw->setStrokeWidth(0);
+      $draw->rectangle($posX + 8, $posY + 8, $posX + 20, $posY + 62,);
+      $im->drawImage($draw);
+
+      // text
+      $im = WriteText($im, $batterypercent, $white, 50, $fontDINNNext, $posX + 68, $posY + 52,\Imagick::ALIGN_LEFT);
+
+
+      // draw small icon
+  } else {
+
   $posX = 420;
   $posY =30;
+  
   // Drawing battery icon
   $draw = new \ImagickDraw();
   $draw->setFillColor($transp);
@@ -392,6 +435,9 @@ if($batterypercent != "") {
   $im->drawImage($draw);
   
   $im = WriteText($im, $batterypercent, $white, 24, $fontDINNNext, $posX + 26, $posY + 24,\Imagick::ALIGN_LEFT);
+
+  }
+
 }
 
 
