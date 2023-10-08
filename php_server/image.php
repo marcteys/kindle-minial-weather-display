@@ -10,16 +10,16 @@
 $todayString = $today->format('Y-m-d H:i:s');
 
 error_log("\r\n", 3, $log_file);
-error_log("Time: " . strtotime('now') . " ", 3, $log_file);
-error_log("(" . $todayString . ") =>", 3, $log_file);
-error_log("a", 3, $log_file);
-
+error_log("Starting time: " . $todayString . " ", 3, $log_file);
+error_log("( " . strtotime('now')  . " )", 3, $log_file);
+error_log("\r\n", 3, $log_file);
 $debug = isset($_GET["debug"]);
 $export = isset($_GET["export"]);
-
-
-error_log("b", 3, $log_file);
-
+$batterypercent = "";
+if(isset($_GET["battery"])) {
+  $batterypercent=$_GET["battery"];
+}
+error_log("Found GET parameters in url. debug:".$debug." , export:".$export." , batterypercent:".$batterypercent." \r\n", 3, $log_file);
 
 /* ///////////////////
 
@@ -28,6 +28,7 @@ error_log("b", 3, $log_file);
 */ ///////////////////
 
 
+error_log("Loading forecast and raincast from previous files. ", 3, $log_file);
 
 $JSONDATA = json_decode("{}");
 $forecast = "";
@@ -41,8 +42,8 @@ $JSONDATA = $merged;
 
 $lastUpdate = json_decode(file_get_contents("lastUpdate.json"))->update;
 
+error_log("Complete.\r\n", 3, $log_file);
 
-error_log("c", 3, $log_file);
 
 $differenceFromLastUpdate = (strtotime("now") - $lastUpdate);
 
@@ -55,10 +56,19 @@ else if(isset($_GET["test"])) $forceAPIUpdate = true;
 
 
 if($forceAPIUpdate) { // Get The readl data;
+
+  error_log("Forcing forecast and raincast from meteofrance. ", 3, $log_file);
+
 	$forecast = "";
 	$raincast = "";
-  $forecast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=".$lat."&lon=".$lon."&id=&instants=morning,afternoon,evening,night&token=".$token);
-  $raincast = file_get_contents("https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=".$lat."&lon=".$lon."&token=".$token);
+  $forecastTargetUrl = "https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=".$lat."&lon=".$lon."&id=&instants=morning,afternoon,evening,night&token=".$token;
+  $raincastTargetUrl = "https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=".$lat."&lon=".$lon."&token=".$token;
+  error_log("\r\nForecastTargetUrl: " .$forecastTargetUrl, 3, $log_file);
+  error_log("\r\nRaincastTargetUrl" . $raincastTargetUrl, 3, $log_file);
+
+
+  $forecast = file_get_contents($forecastTargetUrl);
+  $raincast = file_get_contents($raincastTargetUrl);
 
   file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
   $lastUpdate = strtotime("now");
@@ -69,19 +79,12 @@ if($forceAPIUpdate) { // Get The readl data;
   $JSONDATA = $merged;
 
   if($debug) $debug = "Updated !";
+  error_log("Loaded.\r\n", 3, $log_file);
+
 }  else {
+  error_log("Error loading.\r\n", 3, $log_file);
   if($debug) $debug = "Retrieved !";
 }
-
-error_log("d", 3, $log_file);
-
-
-$batterypercent = "";
-
-if(isset($_GET["battery"])) {
-  $batterypercent=$_GET["battery"];
-}
-
 
 
 /* /////////////////////////////////
@@ -99,14 +102,12 @@ foreach($xml->children() as $child) {
     $iconsList += array($att->name->__toString() => $child[0]->__toString());
 }
 
+error_log("Sorting icons file to array.\r\n", 3, $log_file);
+
 //echo GetIcon($iconsList,"day-showers");
 
 
 
-
-
-
-error_log("e", 3, $log_file);
 
 
 
@@ -120,6 +121,7 @@ error_log("e", 3, $log_file);
 
 */ ///////////////////
 
+error_log("Building precipitations array.", 3, $log_file);
 
 $PrecipitationsData = array();
 $PrecipitationSum = 0;
@@ -134,10 +136,10 @@ for($i = 0; $i < 9; $i++) {
   array_push($PrecipitationsData, $prec);
 }
 
+error_log(" Done.\r\n", 3, $log_file);
 
 
-error_log("f", 3, $log_file);
-
+error_log("Building prevision array.", 3, $log_file);
 
 $PrevisionsData = array();
 for($i = 0; $i < 6; $i++) {
@@ -159,6 +161,7 @@ for($i = 0; $i < 6; $i++) {
   array_push($PrevisionsData, $DayData);
 }
 
+error_log(" Done.\r\n", 3, $log_file);
 
 
 // From top to bottom
@@ -185,12 +188,7 @@ if (strlen(print_r($WeatherData,true)) < 30)  {
 
 file_put_contents("last.json",  date("l jS \of F Y h:i:s A"));
 
-error_log("g", 3, $log_file);
-
-
-
-
-
+error_log("File stored in 'all.json' at time " . date("l jS \of F Y h:i:s A") ."\r\n", 3, $log_file);
 
 
 
@@ -215,22 +213,21 @@ $randomImageUrl = $images[array_rand($images)]; // See comments
 
 
 
-error_log("h", 3, $log_file);
+error_log("Background image. ", 3, $log_file);
 
 
 $im = new imagick(realpath($randomImageUrl));
 
-error_log(realpath($randomImageUrl), 3, $log_file);
+error_log("Loading at " . realpath($randomImageUrl) . ". ", 3, $log_file);
 
 $imageprops = $im->getImageGeometry();
-error_log("h2", 3, $log_file);
 
 $im->setImageCompressionQuality(100);
-error_log("h3", 3, $log_file);
+error_log("\r\nCompress. ", 3, $log_file);
 
 $im->cropThumbnailImage( 600, 800 );
 
-error_log("i", 3, $log_file);
+error_log("Crop. ", 3, $log_file);
 
 
 
@@ -244,9 +241,8 @@ $imagick2->newPseudoImage(600, 100, 'gradient:#bbbbbb-#ffffff');
 // Composite images by BLEND model.
 $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 0);
 
+error_log("Adding gradient top. ", 3, $log_file);
 
-
-error_log("j", 3, $log_file);
 
 
 // dégradé Bas 
@@ -255,7 +251,7 @@ $imagick2 = new Imagick();
 $imagick2->newPseudoImage(600, 280, 'gradient:#ffffff-#555555');
 // Composite images by BLEND model.
 $im->compositeImage($imagick2, Imagick::COMPOSITE_MULTIPLY, 0, 520);
-
+error_log("Adding gradient bottom. ", 3, $log_file);
 
 
 
@@ -288,6 +284,7 @@ if($colors["luminosity"] > 0.54)
 }
 // dégradé Milieu 
 
+error_log("Adding gradient center. ", 3, $log_file);
 
 
 
@@ -315,7 +312,7 @@ if($debug != "" ||  $debug != null) {
   $im = WriteText($im, $debug, $white, 100, $fontDINNNextBold, 370, 415,\Imagick::ALIGN_CENTER);
 }
 
-error_log("k", 3, $log_file);
+error_log("Writing text. ", 3, $log_file);
 
 $topBasePosition = 225;
 
@@ -356,85 +353,86 @@ $im = WriteText($im, date('H\hi', strtotime('now')), $white, 14, $fontDINNNext, 
 
 if($batterypercent != "") {
 
+  error_log("Display battery. ", 3, $log_file);
 
   // Draw big icon
   if($batterypercent <= 8) {
 
-      $posX = 225;
-      $posY =355;
+    $posX = 225;
+    $posY =355;
 
-      // body
-      $draw = new \ImagickDraw();
-      $draw->setFillColor($transp);
-      $draw->setStrokeColor($white);
-      $draw->setStrokeOpacity(1);
-      $draw->setStrokeWidth(6);
-      $draw->roundRectangle($posX + 0, $posY + 0, $posX + 150, $posY + 70, 5, 5);
-      $im->drawImage($draw);
-      $im->drawImage($draw);
-      //tip
-      $draw = new \ImagickDraw();
-      $draw->setFillColor($transp);
-      $draw->setStrokeColor($white);
-            $draw->setStrokeOpacity(1);
-      $draw->setStrokeWidth(6);
-      $draw->roundRectangle($posX + 150,  $posY + 20, $posX +170, $posY + 50,3,3);
-      $im->drawImage($draw);
-      $im->drawImage($draw);
+    // body
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($transp);
+    $draw->setStrokeColor($white);
+    $draw->setStrokeOpacity(1);
+    $draw->setStrokeWidth(6);
+    $draw->roundRectangle($posX + 0, $posY + 0, $posX + 150, $posY + 70, 5, 5);
+    $im->drawImage($draw);
+    $im->drawImage($draw);
+    //tip
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($transp);
+    $draw->setStrokeColor($white);
+          $draw->setStrokeOpacity(1);
+    $draw->setStrokeWidth(6);
+    $draw->roundRectangle($posX + 150,  $posY + 20, $posX +170, $posY + 50,3,3);
+    $im->drawImage($draw);
+    $im->drawImage($draw);
 
-      // inside
-      $draw = new \ImagickDraw();
-      $draw->setFillColor($white);
-      $draw->setStrokeOpacity(0);
-      $draw->setStrokeWidth(0);
-      $draw->rectangle($posX + 8, $posY + 8, $posX + 20, $posY + 62,);
-      $im->drawImage($draw);
+    // inside
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $draw->setStrokeOpacity(0);
+    $draw->setStrokeWidth(0);
+    $draw->rectangle($posX + 8, $posY + 8, $posX + 20, $posY + 62);
+    $im->drawImage($draw);
 
-      // text
-      $im = WriteText($im, $batterypercent, $white, 50, $fontDINNNext, $posX + 68, $posY + 52,\Imagick::ALIGN_LEFT);
-
-
-      // draw small icon
+    // text
+    $im = WriteText($im, $batterypercent, $white, 50, $fontDINNNext, $posX + 68, $posY + 52,\Imagick::ALIGN_LEFT);
+    error_log("Big icon. ", 3, $log_file);
+    // draw small icon
   } else {
 
-  $posX = 420;
-  $posY =30;
-  
-  // Drawing battery icon
-  $draw = new \ImagickDraw();
-  $draw->setFillColor($transp);
-  $draw->setStrokeColor($white);
-  $draw->setStrokeOpacity(1);
-  $draw->setStrokeWidth(2);
-  $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
-  $im->drawImage($draw);
-  $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
-  $im->drawImage($draw);
+    $posX = 420;
+    $posY =30;
+    
+    // Drawing battery icon
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($transp);
+    $draw->setStrokeColor($white);
+    $draw->setStrokeOpacity(1);
+    $draw->setStrokeWidth(2);
+    $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
+    $im->drawImage($draw);
+    $draw->roundRectangle($posX + 0, $posY + 0, $posX + 60, $posY + 30, 5, 5);
+    $im->drawImage($draw);
 
- /* $draw = new \ImagickDraw();
-  $draw->setFillColor($white);
-  $draw->setStrokeOpacity(1);
-  $draw->setStrokeWidth(2);
-  $draw->roundRectangle($posX + 60, $posY + 15, $posX + 5, $posY + 5, 5, 5);
-  $im->drawImage($draw);*/
+   /* $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $draw->setStrokeOpacity(1);
+    $draw->setStrokeWidth(2);
+    $draw->roundRectangle($posX + 60, $posY + 15, $posX + 5, $posY + 5, 5, 5);
+    $im->drawImage($draw);*/
 
-  $draw = new \ImagickDraw();
-  $draw->setFillColor($transp);
-  $draw->setStrokeColor($white);
-  $draw->setStrokeOpacity(1);
-  $draw->setStrokeWidth(2);
-  $draw->rectangle($posX + 60,  $posY + 10, $posX +66, $posY + 20);
-  $im->drawImage($draw);
-  $im->drawImage($draw);
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($transp);
+    $draw->setStrokeColor($white);
+    $draw->setStrokeOpacity(1);
+    $draw->setStrokeWidth(2);
+    $draw->rectangle($posX + 60,  $posY + 10, $posX +66, $posY + 20);
+    $im->drawImage($draw);
+    $im->drawImage($draw);
 
 
-  $draw = new \ImagickDraw();
-  $draw->setFillColor($white);
-  $draw->setStrokeWidth(0);
-  $draw->rectangle($posX + 5,  $posY + 5, $posX +5 + $batterypercent +1, $posY + 25);
-  $im->drawImage($draw);
-  
-  $im = WriteText($im, $batterypercent, $white, 24, $fontDINNNext, $posX + 26, $posY + 24,\Imagick::ALIGN_LEFT);
+    $draw = new \ImagickDraw();
+    $draw->setFillColor($white);
+    $draw->setStrokeWidth(0);
+    $draw->rectangle($posX + 5,  $posY + 5, $posX +5 + $batterypercent +1, $posY + 25);
+    $im->drawImage($draw);
+    
+    $im = WriteText($im, $batterypercent, $white, 24, $fontDINNNext, $posX + 26, $posY + 24,\Imagick::ALIGN_LEFT);
+    error_log("Small icon. ", 3, $log_file);
 
   }
 
@@ -443,7 +441,7 @@ if($batterypercent != "") {
 
 
 
-error_log("l", 3, $log_file);
+error_log("Writing previsions. ", 3, $log_file);
 
 
 $position = 85; // 60 + 25
@@ -472,7 +470,7 @@ for( $i = 1; $i < 6 ;$i++) {
 }
 
 
-error_log("m", 3, $log_file);
+error_log("Done.\r\n", 3, $log_file);
 
 
 
@@ -483,6 +481,8 @@ error_log("m", 3, $log_file);
 */ /////////////////////////////////
 
 if( $WeatherData['precipitations'] != null ) {
+  error_log("Writing precipitations. ", 3, $log_file);
+
   $leftMargin = 70;
   $topPosition = 335;
   $width = 36;
@@ -505,7 +505,6 @@ if( $WeatherData['precipitations'] != null ) {
       $im->drawImage($draw);
   }
 
-error_log("n", 3, $log_file);
 
   // last three 
 
@@ -530,14 +529,18 @@ error_log("n", 3, $log_file);
       $textPos = 150 + ($margin + $width ) * $i;
       $im = WriteText($im, $text, $white, 12, $fontDINNNext, $textPos, $topPosition + 22,\Imagick::ALIGN_CENTER);
   }
-      // time start
-      $im = WriteText($im, $WeatherData['precipitations'][0]['time'], $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
-      // time end
-      $im = WriteText($im, $WeatherData['precipitations'][8]['time'], $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
+  // time start
+  $im = WriteText($im, $WeatherData['precipitations'][0]['time'], $white, 14, $fontDINNNextBold, 70, $topPosition + 24,\Imagick::ALIGN_LEFT);
+  // time end
+  $im = WriteText($im, $WeatherData['precipitations'][8]['time'], $white, 14, $fontDINNNextBold, 526, $topPosition + 24,\Imagick::ALIGN_RIGHT);
 
+  error_log("Done.\r\n", 3, $log_file);
 
 
 } // If there are no precipitationss
+else {
+  error_log("No precipitations.\r\n", 3, $log_file);
+}
 
 
 /* /////////////////////////////////
@@ -547,9 +550,8 @@ error_log("n", 3, $log_file);
 */ /////////////////////////////////
 
 
-error_log("o", 3, $log_file);
+error_log("End of image.php \r\n", 3, $log_file);
 
- 
 function WriteText($image, $text, $fillColor, $fontSize, $font,$x, $y, $align ) {
 
     $draw = new \ImagickDraw();
