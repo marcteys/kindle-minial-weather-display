@@ -1,5 +1,13 @@
 RewriteEngine on
+
+# Force HTTP (Kindle wget compatibility)
 RewriteCond %{HTTPS} on
 RewriteRule ^ http://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-RewriteRule weather-image.png getImage.php
-RewriteRule getImage.png getImage.php
+
+# New API endpoint (recommended)
+RewriteRule ^weather$ api.php [L,QSA]
+RewriteRule ^weather.png$ api.php [L,QSA]
+
+# Backward compatibility - redirect old endpoints to new API
+RewriteRule ^weather-image\.png$ api.php [L,QSA]
+RewriteRule ^getImage\.png$ api.php [L,QSA]

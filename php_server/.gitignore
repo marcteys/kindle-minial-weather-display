@@ -1,0 +1,27 @@
+# Background photos (add your own)
+/Photos/
+
+# SVG files
+/svg/
+
+# Generated cache files
+/cache/
+*.json
+
+# Generated log files
+/logs/
+*.log
+
+# Generated weather images
+weatherImage.png
+testImage.png
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
