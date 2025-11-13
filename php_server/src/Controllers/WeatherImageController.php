@@ -65,8 +65,7 @@ class WeatherImageController
 
             Logger::info("===== Image generation completed =====");
         } catch (\Exception $e) {
-            Logger::error("Image generation failed: " . $e->getMessage());
-            Logger::error("Stack trace: " . $e->getTraceAsString());
+            Logger::exception($e);
 
             if ($verbose ?? false) {
                 $this->outputError($e);

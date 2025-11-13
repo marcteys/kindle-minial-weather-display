@@ -78,7 +78,7 @@ class MeteoFranceProvider implements WeatherProvider
 
             return $weatherData;
         } catch (\Exception $e) {
-            Logger::error("Failed to fetch weather data: " . $e->getMessage());
+            Logger::exception($e);
 
             // Try to use stale cache as fallback
             if (file_exists($cacheFile)) {
@@ -175,11 +175,11 @@ class MeteoFranceProvider implements WeatherProvider
         $forecasts = $this->processForecasts($forecastData);
 
         return new WeatherData(
-            lastUpdateDate: $dateFormatter->format(new \DateTime()),
-            lastUpdateTime: date('H\hi', $now),
-            lastUpdateTimestamp: $now,
-            precipitations: $precipitations,
-            forecasts: $forecasts
+            $dateFormatter->format(new \DateTime()),
+            date('H\hi', $now),
+            $now,
+            $precipitations,
+            $forecasts
         );
     }
 
@@ -276,11 +276,11 @@ class MeteoFranceProvider implements WeatherProvider
     private function weatherDataFromArray(array $data): WeatherData
     {
         return new WeatherData(
-            lastUpdateDate: $data['lastUpdateDate'],
-            lastUpdateTime: $data['lastUpdateTime'],
-            lastUpdateTimestamp: $data['lastUpdateTimestamp'],
-            precipitations: $data['precipitations'],
-            forecasts: $data['forecasts']
+            $data['lastUpdateDate'],
+            $data['lastUpdateTime'],
+            $data['lastUpdateTimestamp'],
+            $data['precipitations'],
+            $data['forecasts']
         );
     }
 }
