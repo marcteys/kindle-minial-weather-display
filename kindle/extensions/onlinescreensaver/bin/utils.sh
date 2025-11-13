@@ -34,8 +34,6 @@ currentTime () {
 
 wait_for () { 
 	delay=$1
-	#USE_RTC=0
-	#RTC=1
 	now=$(currentTime)
 
     if [ "x1" == "x$LOGGING" ]; then
@@ -53,10 +51,10 @@ wait_for () {
 
 	while [ $(currentTime) -lt $ENDWAIT ]; do
 		REMAININGWAITTIME=$(( $ENDWAIT - $(currentTime) ))
-		#logger "utils.sh: REMAININGWAITTIME $REMAININGWAITTIME"
+		logger "utils.sh: REMAININGWAITTIME $REMAININGWAITTIME"
 
 		if [ 0 -lt $REMAININGWAITTIME ]; then
-			sleep 2
+			sleep 1
 			lipc-get-prop com.lab126.powerd status | grep "Screen Saver" 
 			if [ $? -eq 1 ] #  $? is the result of previous call
 			then
@@ -67,13 +65,25 @@ wait_for () {
 
 				if [ 1 -eq $USE_RTC ]; then
 					logger "utils.sh:69: Sleep using RTC for $REMAININGWAITTIME seconds"
-					/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem
+
+					echo 0 > /sys/class/rtc/rtc$RTC/wakealarm
+				# set new wakeup time
+					#echo $REMAININGWAITTIME > /sys/class/rtc/rtc$RTC/wakealarm
+					# suspend
+					logger "wait for device to resume from sleep, or for time out"
+					#echo "mem" > /sys/power/state
+
+
+					#/mnt/us/extensions/onlinescreensaver/bin/rtcwake -d rtc$RTC -s $REMAININGWAITTIME -m mem #marche bof
+					#/usr/sbin/rtcwake -s $REMAININGWAITTIME
+					#rtcwake -d /dev/rtc1 -m no -s $REMAININGWAITTIME #marche pas
+					#logger  /sys/power/state
 		        else
 		        	logger "utils.sh:72: Sleep using normal sleep function. for $REMAININGWAITTIME seconds"
 		            sleep $REMAININGWAITTIME
 		        fi
 				logger "utils.sh:75: Woke up again!"
-				logger "utils.sh:76: Finished waiting, switch wireless back on"
+			#	logger "utils.sh:76: Finished waiting, switch wireless back on"
 				lipc-set-prop com.lab126.cmd wirelessEnable 1
 			else
 				# not in screensaver mode - don't really sleep with rtcwake
@@ -82,11 +92,13 @@ wait_for () {
 				logger "utils.sh:82: Wake up from $REMAININGWAITTIME"
 			fi
 		fi
+		logger "utils.sh:86: Finishing wait_for() 1"
+
 	done
 
-	logger "utils.sh:86: Finishing wait_for()"
+	logger "utils.sh:86: Finishing wait_for() 2"
 
 	# not sure whether this is required
-	lipc-set-prop com.lab126.powerd -i deferSuspend 40
+	#lipc-set-prop com.lab126.powerd -i deferSuspend 40
 }
 
