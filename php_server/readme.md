@@ -12,6 +12,7 @@ A modern, refactored PHP server that generates weather images optimized for Kind
 - 🎨 **E-ink Optimized** - 16-color grayscale quantization for perfect Kindle display
 - 📦 **Smart Caching** - Reduces API calls, with automatic fallback on errors
 - 🔋 **Battery Display** - Shows Kindle battery level on low charge
+- ⚠️ **Error Images** - PHP errors displayed directly on Kindle screen for easy debugging
 - 🐛 **Debug Interface** - Visual dashboard for testing and troubleshooting
 - 🚀 **No Composer Required** - Simple PSR-4 autoloader included
 
@@ -261,6 +262,37 @@ cat /mnt/us/extensions/onlinescreensaver/onlinescreensaver.log
 - Wrong URL in config.sh → Verify GENERATION_URI
 - Network timeout → Increase NETWORK_TIMEOUT in Kindle config
 - Image format issue → Test URL in browser first
+
+### Error Displayed on Kindle Screen
+
+**If you see an error image on your Kindle:**
+
+The system automatically generates error images when PHP errors occur, making debugging much easier! The error image shows:
+- ⚠ ERROR header in red
+- Error message
+- File name and line number
+- Timestamp
+- Troubleshooting hints
+
+**What to do:**
+1. **Read the error message** - It tells you what went wrong
+2. **Check the file and line** - Shows exactly where the problem is
+3. **View full logs** - Visit `http://your-server.com/debug.php?verbose=true`
+4. **Check server logs** - `tail -f logs/app.log`
+
+**Common error causes:**
+- Missing API credentials → Add to Config.php
+- Imagick not installed → Install PHP Imagick extension
+- Permission issues → Check cache/ and logs/ are writable
+- Missing background images → Add images to Photos/ directory
+- Syntax errors → Check recent code changes
+
+**To get detailed error output instead of image:**
+```bash
+curl "http://your-server.com/api.php?verbose=true"
+```
+
+This will show the full stack trace and detailed error information.
 
 ### Wrong Provider Being Used
 
