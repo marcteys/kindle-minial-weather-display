@@ -48,6 +48,9 @@ error_log("Complete.\r\n", 3, $log_file);
 $differenceFromLastUpdate = (strtotime("now") - $lastUpdate);
 
 $forceAPIUpdate = false;
+var_dump($timeInMinutesBetweenUpdates * 60);
+var_dump($differenceFromLastUpdate * 60);
+
 if($differenceFromLastUpdate > ($timeInMinutesBetweenUpdates * 60)) {
   $forceAPIUpdate = true;
 }
@@ -63,12 +66,28 @@ if($forceAPIUpdate) { // Get The readl data;
 	$raincast = "";
   $forecastTargetUrl = "https://rpcache-aa.meteofrance.com/internet2018client/2.0/forecast?lat=".$lat."&lon=".$lon."&id=&instants=morning,afternoon,evening,night&token=".$token;
   $raincastTargetUrl = "https://rpcache-aa.meteofrance.com/internet2018client/2.0/nowcast/rain?lat=".$lat."&lon=".$lon."&token=".$token;
-  error_log("\r\nForecastTargetUrl: " .$forecastTargetUrl, 3, $log_file);
-  error_log("\r\nRaincastTargetUrl" . $raincastTargetUrl, 3, $log_file);
+  error_log("\r\nForecastTargetUrl: " .$forecastTargetUrl , 3, $log_file);
+  error_log("\r\nRaincastTargetUrl: " . $raincastTargetUrl."\r\n", 3, $log_file);
+      // here, the @ hides the warning if the file_get_contents fails
+      
+      
+  $context = stream_context_create([
+    'http' => [
+        'timeout' => 3,
+    ],
+    'socket' => [
+        'connect_timeout' => 3,
+    ]
+  ]);
+  $forecast = file_get_contents($forecastTargetUrl, false,$context);
+  if($forecast != "")    error_log("Error loading Forecast, timout.\r\n", 3, $log_file);
+  var_dump($forecast);
 
+  $raincast = file_get_contents($raincastTargetUrl, false,$context);
+  if($raincast != "")    error_log("Error loading Raincast, timout.\r\n", 3, $log_file);
+  var_dump($raincast);
 
-  $forecast = file_get_contents($forecastTargetUrl);
-  $raincast = file_get_contents($raincastTargetUrl);
+  if($forecast != "" && $raincast != "") {
 
   file_put_contents("lastUpdate.json", json_encode(array("update"=> strtotime("now"))));
   $lastUpdate = strtotime("now");
@@ -80,6 +99,9 @@ if($forceAPIUpdate) { // Get The readl data;
 
   if($debug) $debug = "Updated !";
   error_log("Loaded.\r\n", 3, $log_file);
+  } else {
+    error_log("Error, cannot load forecast or raincast URL !! Using the privous one.\r\n", 3, $log_file);
+  }
 
 }  else {
   error_log("Error loading.\r\n", 3, $log_file);
@@ -164,9 +186,15 @@ for($i = 0; $i < 6; $i++) {
 error_log(" Done.\r\n", 3, $log_file);
 
 
+
+$dt = new DateTime;
+
+$formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::SHORT, IntlDateFormatter::SHORT);
+$formatter->setPattern('EEEE d MMM');
+
 // From top to bottom
 $WeatherData = array(
-  "lastUpdateDate" => ucwords(strftime('%A %e %B')),
+  "lastUpdateDate" =>  $formatter->format($dt),
   "lastUpdateTime" => date('H\hi', $lastUpdate),
   "precipitations" => $PrecipitationSum != 9 ? $PrecipitationsData : null, // false if none
   "previsions" => $PrevisionsData, // false if none

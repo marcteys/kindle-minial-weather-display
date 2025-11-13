@@ -1,5 +1,14 @@
 <?php 
- include("settings.php");
+ include(dirname(__FILE__).DIRECTORY_SEPARATOR ."settings.php");
+
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+    ini_set('log_errors', '1');
+
+    var_dump(extension_loaded('imagick'));
+    echo PHP_EOL, (new \Imagick())->getVersion()['versionString'] ?? 'nope';
+
+
 
 $verbose = false;
 
@@ -17,7 +26,9 @@ if($verbose) {
 error_log("\r\n----- STARTING NEW IMAGE------\r\n", 3, $log_file);
 
 try {
-    include("image.php");
+
+    include(dirname(__FILE__).DIRECTORY_SEPARATOR ."image.php");
+
     error_log("Finishing treating image.\r\n", 3, $log_file);
 }
 catch (\Exception $e) {
@@ -62,24 +73,30 @@ error_log("Black and white done.\r\n", 3, $log_file);
 error_log("Processing complete.\r\n", 3, $log_file);
 
 //$im->posterizeimage(16, 'true');
+$type ="png";
+
 
     if(!$verbose) {
-        $fileHandle = fopen("weatherImage.png", "w");
+        $fileHandle = fopen("weatherImage.".$type, "w");
         $im->writeImageFile( $fileHandle);
         error_log("File saved on disk.\r\n", 3, $log_file);
         // add the "Content-type" header
-        header('Content-type: image/png'); 
+        header('Content-type: image/'.$type); 
+        // Note : if content -Length is not sent, it sends image as cuncked ! c'st surement ça qui fait foirer le truc de kindle
+        header( 'Content-Length: ' . filesize(realpath("weatherImage.".$type) ) );
+        error_log("File displayed. Time now:", 3, $log_file);
+        error_log(strtotime('now')."\r\n", 3, $log_file);
+
+        echo file_get_contents(realpath("weatherImage.".$type));
          /*
         // add a "Expires" header with an offset of 10 min
         $offset = 60 * 10; // (seconds * minutes)    
         $expire = "Expires: " . gmdate("D, d M Y H:i:s", time() + $offset) . " GMT";
         header($expire);
         header("Cache-Control: max-age=600, must-revalidate");*/
-        $im->setImageFormat("png");
-        $im->stripImage();
-        error_log("File displayed. Time now:", 3, $log_file);
-        error_log(strtotime('now')."\r\n", 3, $log_file);
-        echo $im;
+      //  $im->setImageFormat($type);
+      //  $im->stripImage();
+       // echo $im;
         exit;
     } else {
         echo '<pre>';
