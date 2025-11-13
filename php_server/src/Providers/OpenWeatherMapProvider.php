@@ -137,26 +137,69 @@ class OpenWeatherMapProvider implements WeatherProvider
     }
 
     /**
-     * Make HTTP request to API with timeout
+     * Make HTTP request to API with timeout using cURL
      */
     private function makeApiRequest(string $url): ?array
     {
-        $context = stream_context_create([
-            'http' => [
-                'timeout' => Config::API_TIMEOUT_SECONDS,
-            ],
-            'socket' => [
-                'connect_timeout' => Config::API_TIMEOUT_SECONDS,
-            ]
-        ]);
+        // Check if cURL is available
+        if (!function_exists('curl_init')) {
+            Logger::error("cURL extension is not installed");
+            throw new \Exception("cURL extension is required but not installed");
+        }
 
-        $response = @file_get_contents($url, false, $context);
+        Logger::debug("Making API request to: " . $url);
 
+        $ch = curl_init();
+
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, Config::API_TIMEOUT_SECONDS);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, Config::API_TIMEOUT_SECONDS);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Kindle-Weather-Display/1.0');
+
+        // Execute request
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        $curlErrno = curl_errno($ch);
+
+        curl_close($ch);
+
+        // Log detailed error information
         if ($response === false) {
+            Logger::error("cURL request failed");
+            Logger::error("URL: " . $url);
+            Logger::error("cURL Error Number: " . $curlErrno);
+            Logger::error("cURL Error Message: " . $curlError);
             return null;
         }
 
-        return json_decode($response, true);
+        // Check HTTP status code
+        if ($httpCode !== 200) {
+            Logger::error("API returned non-200 status code");
+            Logger::error("URL: " . $url);
+            Logger::error("HTTP Status Code: " . $httpCode);
+            Logger::error("Response: " . substr($response, 0, 500));
+            return null;
+        }
+
+        Logger::debug("API request successful (HTTP {$httpCode})");
+
+        // Decode JSON response
+        $data = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Logger::error("Failed to decode JSON response");
+            Logger::error("JSON Error: " . json_last_error_msg());
+            Logger::error("Response preview: " . substr($response, 0, 200));
+            return null;
+        }
+
+        return $data;
     }
 
     /**

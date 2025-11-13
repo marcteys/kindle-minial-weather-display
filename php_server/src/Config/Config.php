@@ -21,7 +21,7 @@ class Config
     const METEOFRANCE_TOKEN = '__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__';
 
     // API Credentials - OpenWeatherMap
-    const OPENWEATHERMAP_API_KEY = ''; // Add your OpenWeatherMap API key here
+    const OPENWEATHERMAP_API_KEY = '6522a661efd99b0d7e3c9095e8bb0b0b'; // Add your OpenWeatherMap API key here
 
     // Cache Settings
     const CACHE_DURATION_MINUTES = 10;
@@ -64,7 +64,7 @@ class Config
     const WEATHER_FORECAST_PERIODS = 6;
 
     // Network Settings
-    const API_TIMEOUT_SECONDS = 3;
+    const API_TIMEOUT_SECONDS = 10; // Increased for slower connections
 
     /**
      * Get the active weather provider name
