@@ -8,20 +8,17 @@ namespace KindleWeather\Config;
  */
 class Config
 {
+    // Secrets cache
+    private static $secrets = null;
+
     // Weather Provider Settings
-    const WEATHER_PROVIDER = 'meteofrance'; // Options: 'meteofrance', 'openweathermap'
+    const WEATHER_PROVIDER = 'openmeteo'; // Options: 'meteofrance', 'openweathermap', 'openmeteo', 'hybrid'
 
     // Location Settings
     const LATITUDE = '47.216523';
     const LONGITUDE = '-1.574932';
     const TIMEZONE = 'Europe/Paris';
     const LOCALE = 'fr_FR';
-
-    // API Credentials - Météo France
-    const METEOFRANCE_TOKEN = '__Wj7dVSTjV9YGu1guveLyDq0g7S7TfTjaHBTPTpO0kj8__';
-
-    // API Credentials - OpenWeatherMap
-    const OPENWEATHERMAP_API_KEY = '6522a661efd99b0d7e3c9095e8bb0b0b'; // Add your OpenWeatherMap API key here
 
     // Cache Settings
     const CACHE_DURATION_MINUTES = 10;
@@ -133,5 +130,59 @@ class Config
                 'file' => self::LOG_FILE,
             ],
         ];
+    }
+
+    /**
+     * Load secrets from secrets.php file
+     *
+     * @throws \Exception If secrets file is missing
+     */
+    private static function loadSecrets(): array
+    {
+        if (self::$secrets === null) {
+            $secretsFile = __DIR__ . '/../../secrets.php';
+
+            if (!file_exists($secretsFile)) {
+                throw new \Exception(
+                    "secrets.php not found. Please copy secrets.php.example to secrets.php and add your API credentials."
+                );
+            }
+
+            self::$secrets = require $secretsFile;
+
+            if (!is_array(self::$secrets)) {
+                throw new \Exception("secrets.php must return an array of credentials");
+            }
+        }
+
+        return self::$secrets;
+    }
+
+    /**
+     * Get Météo France API token
+     */
+    public static function getMeteoFranceToken(): string
+    {
+        $secrets = self::loadSecrets();
+
+        if (!isset($secrets['meteofrance_token'])) {
+            throw new \Exception("meteofrance_token not found in secrets.php");
+        }
+
+        return $secrets['meteofrance_token'];
+    }
+
+    /**
+     * Get OpenWeatherMap API key
+     */
+    public static function getOpenWeatherMapApiKey(): string
+    {
+        $secrets = self::loadSecrets();
+
+        if (!isset($secrets['openweathermap_api_key'])) {
+            throw new \Exception("openweathermap_api_key not found in secrets.php");
+        }
+
+        return $secrets['openweathermap_api_key'];
     }
 }

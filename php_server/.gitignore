@@ -16,6 +16,9 @@
 weatherImage.png
 testImage.png
 
+# Secrets and credentials
+secrets.php
+
 # IDE and editor files
 .vscode/
 .idea/

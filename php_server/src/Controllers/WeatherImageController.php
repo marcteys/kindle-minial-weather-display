@@ -7,6 +7,8 @@ use KindleWeather\Models\WeatherData;
 use KindleWeather\Providers\WeatherProvider;
 use KindleWeather\Providers\MeteoFranceProvider;
 use KindleWeather\Providers\OpenWeatherMapProvider;
+use KindleWeather\Providers\OpenMeteoProvider;
+use KindleWeather\Providers\HybridProvider;
 use KindleWeather\Services\ImageRenderer;
 use KindleWeather\Services\Logger;
 use Imagick;
@@ -170,16 +172,19 @@ class WeatherImageController
 
         switch ($providerName) {
             case 'meteofrance':
-                if (empty(Config::METEOFRANCE_TOKEN)) {
-                    throw new \Exception("Météo France token not configured");
-                }
-                return new MeteoFranceProvider(Config::METEOFRANCE_TOKEN);
+                return new MeteoFranceProvider(Config::getMeteoFranceToken());
 
             case 'openweathermap':
-                if (empty(Config::OPENWEATHERMAP_API_KEY)) {
-                    throw new \Exception("OpenWeatherMap API key not configured");
-                }
-                return new OpenWeatherMapProvider(Config::OPENWEATHERMAP_API_KEY);
+                return new OpenWeatherMapProvider(Config::getOpenWeatherMapApiKey());
+
+            case 'openmeteo':
+                return new OpenMeteoProvider();
+
+            case 'hybrid':
+                return new HybridProvider(
+                    Config::getOpenWeatherMapApiKey(),
+                    Config::getMeteoFranceToken()
+                );
 
             default:
                 throw new \Exception("Unknown weather provider: {$providerName}");

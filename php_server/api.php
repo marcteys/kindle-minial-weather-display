@@ -11,8 +11,10 @@
  *   GET /api.php?export=true              - Save image but don't output to browser
  *
  * You can also specify the provider in the URL:
- *   GET /api.php?provider=meteofrance
- *   GET /api.php?provider=openweathermap
+ *   GET /api.php?provider=meteofrance      - Use Météo France only
+ *   GET /api.php?provider=openweathermap   - Use OpenWeatherMap only
+ *   GET /api.php?provider=openmeteo        - Use Open-Meteo (free, no key required)
+ *   GET /api.php?provider=hybrid           - Use OWM for forecast + Météo France for raincast
  */
 
 require_once __DIR__ . '/autoload.php';
@@ -20,6 +22,8 @@ require_once __DIR__ . '/autoload.php';
 use KindleWeather\Controllers\WeatherImageController;
 use KindleWeather\Providers\MeteoFranceProvider;
 use KindleWeather\Providers\OpenWeatherMapProvider;
+use KindleWeather\Providers\OpenMeteoProvider;
+use KindleWeather\Providers\HybridProvider;
 use KindleWeather\Services\ErrorImageRenderer;
 use KindleWeather\Services\Logger;
 use KindleWeather\Config\Config;
@@ -96,15 +100,22 @@ if (isset($_GET['provider'])) {
 
     switch ($providerName) {
         case 'meteofrance':
-            if (!empty(Config::METEOFRANCE_TOKEN)) {
-                $provider = new MeteoFranceProvider(Config::METEOFRANCE_TOKEN);
-            }
+            $provider = new MeteoFranceProvider(Config::getMeteoFranceToken());
             break;
 
         case 'openweathermap':
-            if (!empty(Config::OPENWEATHERMAP_API_KEY)) {
-                $provider = new OpenWeatherMapProvider(Config::OPENWEATHERMAP_API_KEY);
-            }
+            $provider = new OpenWeatherMapProvider(Config::getOpenWeatherMapApiKey());
+            break;
+
+        case 'openmeteo':
+            $provider = new OpenMeteoProvider();
+            break;
+
+        case 'hybrid':
+            $provider = new HybridProvider(
+                Config::getOpenWeatherMapApiKey(),
+                Config::getMeteoFranceToken()
+            );
             break;
     }
 }
